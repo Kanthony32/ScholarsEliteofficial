@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholars Elite Academy — Development Is the Standard</title>
+<meta name="description" content="A development-first girls basketball program. Development > Exposure. Opportunity is Earned.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Barlow+Condensed:wght@400;500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+/* ═══════════ TOKENS ═══════════ */
+:root {
+  --navy:#0D1B3E; --navy-dk:#080F22; --navy-md:#162347;
+  --black:#06080F; --purple:#602F96; --purple-lt:#8B4FCB;
+  --purple-dk:#3D1A6E; --white:#F4F2F8;
+  --white-dim:rgba(244,242,248,0.55); --white-low:rgba(244,242,248,0.2);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;overflow-x:hidden;cursor:none;}
+body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+  opacity:.55;mix-blend-mode:overlay;}
+
+/* ═══════════ CURSOR ═══════════ */
+#cur{position:fixed;z-index:10000;pointer-events:none;width:8px;height:8px;border-radius:50%;background:var(--purple-lt);transform:translate(-50%,-50%);transition:width .15s,height .15s;mix-blend-mode:screen;}
+#cur-ring{position:fixed;z-index:9998;pointer-events:none;width:32px;height:32px;border-radius:50%;border:1px solid rgba(139,79,203,.4);transform:translate(-50%,-50%);transition:width .28s,height .28s;}
+body.hov #cur{width:16px;height:16px;background:var(--purple);}
+body.hov #cur-ring{width:52px;height:52px;border-color:var(--purple);}
+
+/* ═══════════ ANNOUNCEMENT BAR ═══════════ */
+#ann-bar{background:var(--purple);padding:10px 52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:900;border-bottom:1px solid rgba(244,242,248,.15);}
+.ann-track{overflow:hidden;flex:1;}
+.ann-items{display:flex;gap:0;}
+.ann-item{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(244,242,248,.9);white-space:nowrap;min-width:100%;text-align:center;transition:opacity .5s;}
+.ann-item b{color:var(--white);}
+.ann-nav{display:flex;gap:8px;flex-shrink:0;}
+.ann-btn{background:none;border:none;cursor:pointer;color:rgba(244,242,248,.5);font-size:14px;padding:2px 6px;transition:color .2s;}
+.ann-btn:hover{color:var(--white);}
+
+/* ═══════════ NAV ═══════════ */
+nav{position:sticky;top:41px;left:0;right:0;z-index:800;display:flex;align-items:center;justify-content:space-between;padding:18px 52px;background:rgba(6,8,15,.9);backdrop-filter:blur(20px) saturate(1.3);border-bottom:1px solid rgba(96,47,150,.25);transition:padding .3s;}
+nav.up{padding:12px 52px;}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.nav-logo-mark{width:36px;height:36px;flex-shrink:0;}
+.nav-brand-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--white);line-height:1;}
+.nav-brand-sub{font-family:'Courier Prime',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-top:2px;}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none;}
+.nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:12.5px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);text-decoration:none;position:relative;padding-bottom:3px;transition:color .2s;}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--purple-lt);transition:width .3s cubic-bezier(.76,0,.24,1);}
+.nav-links a:hover,.nav-links a.active{color:var(--white);}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%;}
+.nav-cta{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;background:var(--purple);color:var(--white)!important;padding:9px 22px;text-decoration:none!important;transition:background .2s;}
+.nav-cta::after{display:none!important;}
+.nav-cta:hover{background:var(--purple-lt)!important;}
+.hamburger{display:none;flex-direction:column;gap:6px;cursor:pointer;background:none;border:none;}
+.hamburger span{width:22px;height:1px;background:var(--white);display:block;}
+/* mobile */
+.mob{display:none;position:fixed;inset:0;z-index:790;background:var(--navy-dk);flex-direction:column;align-items:center;justify-content:center;gap:28px;}
+.mob.open{display:flex;}
+.mob a{font-family:'Oswald',sans-serif;font-size:42px;font-weight:400;color:var(--white);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s;}
+.mob a:hover{color:var(--purple-lt);}
+.mob-x{position:absolute;top:24px;right:52px;font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--white-dim);background:none;border:none;cursor:pointer;}
+
+/* ═══════════ PAGE SYSTEM ═══════════ */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ═══════════ SHARED ATOMS ═══════════ */
+.kicker{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--purple-lt);display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.kicker::before{content:'';width:22px;height:1px;background:var(--purple);}
+.sec-h{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(44px,6.5vw,88px);line-height:.92;letter-spacing:-.5px;margin-bottom:20px;}
+.sec-p{font-size:16px;line-height:1.85;color:var(--white-dim);max-width:540px;}
+.rv{opacity:0;transform:translateY(32px);}
+.rv.vis{opacity:1;transform:translateY(0);transition:opacity .75s ease,transform .75s cubic-bezier(.16,1,.3,1);}
+.btn-pur{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;background:var(--purple);color:var(--white);padding:14px 36px;text-decoration:none;transition:background .2s;display:inline-block;border:none;cursor:pointer;}
+.btn-pur:hover{background:var(--purple-lt);}
+.btn-outline{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2.5px;text-transform:uppercase;background:transparent;color:var(--white-dim);padding:14px 36px;text-decoration:none;border:1px solid rgba(244,242,248,.2);transition:all .2s;display:inline-block;cursor:pointer;}
+.btn-outline:hover{border-color:var(--purple-lt);color:var(--white);}
+.sec-pad{padding:100px 52px;}
+.sec-pad-sm{padding:70px 52px;}
+
+/* ═══════════ TICKER ═══════════ */
+.ticker{background:var(--purple-dk);padding:10px 0;overflow:hidden;white-space:nowrap;border-bottom:1px solid rgba(96,47,150,.4);}
+.ticker-track{display:inline-flex;animation:tick 40s linear infinite;}
+.t-i{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;padding:0 28px;color:rgba(244,242,248,.4);}
+.t-i b{color:var(--purple-lt);font-weight:600;}
+@keyframes tick{to{transform:translateX(-50%);}}
+
+/* ══════════════════════════════════════════
+   HOME PAGE
+══════════════════════════════════════════ */
+/* hero */
+#hero{position:relative;min-height:100vh;overflow:hidden;border-bottom:1px solid rgba(96,47,150,.3);}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;}
+.hero-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(6,8,15,.3) 0%,rgba(6,8,15,.1) 40%,rgba(6,8,15,.65) 75%,rgba(6,8,15,.98) 100%);}
+.hero-inner{position:relative;z-index:3;min-height:100vh;padding:140px 52px 80px;display:flex;flex-direction:column;justify-content:flex-end;}
+.hero-badge{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--purple-lt);display:flex;align-items:center;gap:12px;margin-bottom:20px;opacity:0;}
+.hero-badge::before{content:'';width:28px;height:1px;background:var(--purple);}
+.hero-display{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(68px,12vw,190px);line-height:.88;letter-spacing:-1px;margin-bottom:28px;}
+.hero-display .ln{display:block;overflow:hidden;line-height:.92;padding-bottom:6px;}
+.hero-display .ln span{display:block;transform:translateY(110%);}
+.hero-display .ln.pur span{color:var(--purple-lt);}
+.hero-rule{width:60px;height:2px;background:var(--purple);margin-bottom:24px;opacity:0;}
+.hero-sub-row{display:grid;grid-template-columns:1fr auto;align-items:flex-end;gap:40px;margin-bottom:36px;opacity:0;}
+.hero-desc{font-size:clamp(15px,1.8vw,20px);font-weight:300;color:var(--white-dim);line-height:1.65;max-width:520px;}
+.hero-desc strong{color:var(--white);font-weight:600;}
+.hero-stats{display:flex;gap:40px;align-items:flex-end;}
+.hs-n{font-family:'Oswald',sans-serif;font-size:52px;font-weight:600;color:var(--white);line-height:1;display:block;}
+.hs-l{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--purple-lt);}
+.hero-actions{display:flex;gap:16px;align-items:center;opacity:0;}
+
+/* upcoming events strip */
+.upcoming-strip{background:var(--navy-dk);padding:70px 52px;border-bottom:1px solid rgba(96,47,150,.2);}
+.upcoming-strip h2{font-family:'Oswald',sans-serif;font-size:clamp(32px,4vw,52px);font-weight:700;color:var(--white);margin-bottom:8px;}
+.upcoming-sub{font-size:14px;color:var(--white-dim);margin-bottom:44px;}
+.event-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:4px;}
+.ev-card{background:rgba(96,47,150,.08);border:1px solid rgba(96,47,150,.2);padding:28px;transition:background .25s;cursor:pointer;}
+.ev-card:hover{background:rgba(96,47,150,.18);}
+.ev-date{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:10px;}
+.ev-name{font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;color:var(--white);margin-bottom:6px;letter-spacing:.5px;}
+.ev-loc{font-size:12.5px;color:var(--white-dim);margin-bottom:14px;}
+.ev-tag{display:inline-block;font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(96,47,150,.4);color:var(--white-dim);margin-right:5px;margin-bottom:6px;}
+.ev-tag.camp{border-color:var(--purple-lt);color:var(--purple-lt);}
+.ev-tag.travel{border-color:rgba(244,242,248,.25);color:var(--white-dim);}
+.ev-tag.tbd{opacity:.5;}
+.ev-cta{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--purple-lt);text-decoration:none;display:flex;align-items:center;gap:6px;margin-top:12px;transition:gap .2s;}
+.ev-card:hover .ev-cta{gap:12px;}
+
+/* home about teaser */
+.home-about{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;background:var(--black);}
+.ha-quote{font-family:'Oswald',sans-serif;font-size:clamp(28px,3.5vw,48px);font-weight:700;line-height:1.1;color:var(--white);}
+.ha-quote em{color:var(--purple-lt);font-style:normal;}
+.ha-body{font-size:15.5px;line-height:1.85;color:var(--white-dim);margin-top:20px;}
+.ha-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;}
+.ha-pill{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;border:1px solid rgba(96,47,150,.35);color:var(--white-dim);}
+.ha-actions{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;}
+
+/* home standards mini */
+.std-mini{background:var(--navy-dk);padding:70px 52px;border-top:1px solid rgba(96,47,150,.2);border-bottom:1px solid rgba(96,47,150,.2);}
+.std-mini-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:48px;border:1px solid rgba(96,47,150,.2);}
+.smc{padding:32px 24px;border-right:1px solid rgba(96,47,150,.15);transition:background .25s;}
+.smc:last-child{border-right:none;}
+.smc:hover{background:rgba(96,47,150,.1);}
+.smc-n{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2px;color:var(--purple-lt);margin-bottom:10px;}
+.smc-t{font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;color:var(--white);margin-bottom:6px;}
+.smc-d{font-size:12px;color:var(--white-dim);line-height:1.6;}
+
+/* home placements teaser */
+.home-placements{background:var(--purple-dk);padding:70px 52px;border-bottom:1px solid rgba(96,47,150,.3);}
+.place-row{display:flex;flex-wrap:wrap;gap:0;margin-top:36px;border:1px solid rgba(244,242,248,.1);}
+.pr-item{padding:18px 24px;border-right:1px solid rgba(244,242,248,.08);flex:1;min-width:140px;}
+.pr-item:last-child{border-right:none;}
+.pr-name{font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;color:var(--white);margin-bottom:4px;}
+.pr-school{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--purple-lt);}
+
+/* home CTA */
+.home-cta{background:var(--black);padding:100px 52px;text-align:center;position:relative;overflow:hidden;}
+.home-cta::before{content:'EARN IT';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'Oswald',sans-serif;font-size:clamp(80px,16vw,240px);font-weight:700;color:rgba(244,242,248,.025);white-space:nowrap;pointer-events:none;}
+.hc-kicker{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:24px;display:block;}
+.hc-h{font-family:'Oswald',sans-serif;font-size:clamp(52px,9vw,130px);font-weight:700;line-height:.9;letter-spacing:-1px;color:var(--white);margin-bottom:20px;}
+.hc-h em{color:var(--purple-lt);font-style:normal;}
+.hc-sub{font-size:18px;font-weight:300;font-style:italic;color:var(--white-dim);margin-bottom:44px;}
+.hc-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
+
+/* ══════════════════════════════════════════
+   TEAMS PAGE
+══════════════════════════════════════════ */
+.page-hero{padding:120px 52px 60px;background:var(--navy-dk);border-bottom:1px solid rgba(96,47,150,.25);position:relative;overflow:hidden;}
+.page-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(96,47,150,.03) 0px,rgba(96,47,150,.03) 1px,transparent 1px,transparent 7px),repeating-linear-gradient(90deg,rgba(96,47,150,.03) 0px,rgba(96,47,150,.03) 1px,transparent 1px,transparent 7px);pointer-events:none;}
+.page-hero-inner{position:relative;z-index:1;}
+.page-h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(52px,9vw,110px);line-height:.88;letter-spacing:-1px;color:var(--white);}
+.page-h1 em{color:var(--purple-lt);font-style:normal;}
+.page-sub{font-size:18px;font-weight:300;color:var(--white-dim);margin-top:20px;max-width:580px;line-height:1.65;}
+
+.division-tabs{display:flex;gap:0;border-bottom:2px solid rgba(96,47,150,.3);padding:0 52px;background:var(--navy-dk);}
+.div-tab{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:16px 28px;cursor:pointer;color:var(--white-dim);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
+.div-tab:hover{color:var(--white);}
+.div-tab.on{color:var(--purple-lt);border-bottom-color:var(--purple-lt);}
+
+.division-content{padding:70px 52px;}
+.div-panel{display:none;}
+.div-panel.on{display:block;}
+
+.team-header{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:start;margin-bottom:60px;}
+.team-badge{background:var(--purple-dk);border:1px solid rgba(96,47,150,.4);padding:32px;text-align:center;min-width:200px;}
+.tb-age{font-family:'Oswald',sans-serif;font-size:80px;font-weight:700;color:var(--purple-lt);line-height:.85;letter-spacing:-2px;}
+.tb-level{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--white-dim);margin-top:8px;}
+.tb-rule{width:40px;height:2px;background:var(--purple);margin:12px auto;}
+.tb-label{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--white);}
+.team-info-col h2{font-family:'Oswald',sans-serif;font-size:clamp(32px,4vw,52px);font-weight:700;color:var(--white);margin-bottom:16px;}
+.team-info-col p{font-size:15px;line-height:1.85;color:var(--white-dim);max-width:600px;margin-bottom:20px;}
+.team-focus-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
+.tf-tag{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;padding:6px 13px;border:1px solid rgba(96,47,150,.35);color:var(--white-dim);}
+
+/* schedule table */
+.schedule-section{margin-top:60px;}
+.sched-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);padding-bottom:14px;border-bottom:2px solid rgba(96,47,150,.3);margin-bottom:0;}
+.sched-month{font-family:'Oswald',sans-serif;font-size:28px;font-weight:600;color:var(--white);padding:24px 0 10px;letter-spacing:.5px;}
+.sched-row{display:grid;grid-template-columns:140px 1fr 160px 120px;gap:0;border-bottom:1px solid rgba(96,47,150,.12);padding:18px 0;align-items:center;transition:background .2s;}
+.sched-row:hover{background:rgba(96,47,150,.06);padding-left:8px;}
+.sr-date{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-lt);}
+.sr-name{font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;color:var(--white);letter-spacing:.3px;}
+.sr-name-sub{font-size:12px;color:var(--white-dim);margin-top:2px;}
+.sr-loc{font-size:12.5px;color:var(--white-dim);}
+.sr-type{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;text-align:right;}
+.sr-type.camp{color:var(--purple-lt);}
+.sr-type.travel{color:rgba(244,242,248,.35);}
+.sr-type.tbd{color:rgba(244,242,248,.2);}
+
+.apply-box{background:rgba(96,47,150,.12);border:1px solid rgba(96,47,150,.3);padding:40px;margin-top:48px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;}
+.ab-h{font-family:'Oswald',sans-serif;font-size:26px;font-weight:600;color:var(--white);margin-bottom:8px;}
+.ab-b{font-size:14px;color:var(--white-dim);line-height:1.7;}
+.ab-btns{display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+
+/* ══════════════════════════════════════════
+   EVENTS PAGE
+══════════════════════════════════════════ */
+.events-filters{display:flex;gap:8px;flex-wrap:wrap;padding:28px 52px;border-bottom:1px solid rgba(96,47,150,.2);background:var(--navy-dk);}
+.ef-chip{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;padding:8px 18px;border:1px solid rgba(96,47,150,.3);color:var(--white-dim);cursor:pointer;transition:all .2s;background:none;}
+.ef-chip:hover,.ef-chip.on{background:var(--purple);border-color:var(--purple);color:var(--white);}
+
+.events-list{padding:52px;}
+.em-header{font-family:'Oswald',sans-serif;font-size:clamp(28px,4vw,48px);font-weight:700;color:var(--white);padding:32px 0 18px;border-bottom:1px solid rgba(96,47,150,.25);margin-bottom:4px;letter-spacing:.5px;}
+.event-row{display:grid;grid-template-columns:160px 1fr 200px;gap:0;border-bottom:1px solid rgba(96,47,150,.1);padding:28px 0;align-items:start;transition:all .2s;}
+.event-row:hover{background:rgba(96,47,150,.06);padding-left:10px;padding-right:10px;}
+.er-date{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-lt);padding-top:4px;}
+.er-main{}
+.er-name{font-family:'Oswald',sans-serif;font-size:26px;font-weight:600;color:var(--white);margin-bottom:6px;letter-spacing:.3px;}
+.er-desc{font-size:13.5px;color:var(--white-dim);line-height:1.7;max-width:560px;margin-bottom:12px;}
+.er-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.er-tag{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(96,47,150,.3);color:var(--white-dim);}
+.er-tag.camp{border-color:var(--purple-lt);color:var(--purple-lt);}
+.er-right{text-align:right;display:flex;flex-direction:column;gap:10px;align-items:flex-end;padding-top:4px;}
+.er-loc{font-size:12.5px;color:var(--white-dim);margin-bottom:6px;}
+
+.event-row[data-hidden="true"]{display:none;}
+
+.events-reg-box{background:var(--purple-dk);padding:60px 52px;border-top:1px solid rgba(96,47,150,.3);}
+.erb-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;}
+.erb-h{font-family:'Oswald',sans-serif;font-size:clamp(32px,4vw,52px);font-weight:700;color:var(--white);margin-bottom:16px;}
+.erb-steps{margin-top:28px;}
+.erb-step{display:flex;gap:18px;padding:16px 0;border-bottom:1px solid rgba(244,242,248,.08);}
+.erb-step:last-child{border-bottom:none;}
+.es-n{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:2px;color:var(--purple-lt);min-width:28px;margin-top:2px;}
+.es-t{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--white);margin-bottom:6px;}
+.es-d{font-size:13px;color:var(--white-dim);line-height:1.7;}
+
+/* ══════════════════════════════════════════
+   ABOUT PAGE
+══════════════════════════════════════════ */
+.about-body-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.about-quote-card{background:var(--purple-dk);padding:52px;border:1px solid rgba(96,47,150,.4);}
+.aqc-q{font-family:'Oswald',sans-serif;font-size:clamp(24px,3vw,38px);font-weight:700;line-height:1.15;color:var(--white);margin-bottom:32px;}
+.aqc-q em{color:var(--purple-lt);font-style:normal;}
+.aqc-stat{display:flex;align-items:flex-end;gap:12px;padding-top:28px;border-top:1px solid rgba(96,47,150,.3);}
+.aqc-n{font-family:'Oswald',sans-serif;font-size:72px;font-weight:700;color:var(--purple-lt);line-height:1;}
+.aqc-l{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--white-dim);padding-bottom:10px;}
+.pillar-list{margin-top:36px;border-top:1px solid rgba(244,242,248,.07);}
+.pillar{display:flex;align-items:baseline;gap:20px;padding:18px 0;border-bottom:1px solid rgba(244,242,248,.05);}
+.pl-n{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:2px;color:var(--purple-lt);min-width:28px;}
+.pl-t{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--white);flex:1;}
+.pl-d{font-size:12.5px;color:var(--white-dim);max-width:200px;line-height:1.5;text-align:right;}
+.founder-section{background:var(--navy-dk);padding:70px 52px;border-top:1px solid rgba(96,47,150,.2);border-bottom:1px solid rgba(96,47,150,.2);}
+.founder-card{background:rgba(96,47,150,.1);border:1px solid rgba(96,47,150,.3);padding:52px;display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:start;}
+.fc-badge{background:var(--purple-dk);padding:32px 28px;text-align:center;min-width:160px;}
+.fc-initials{font-family:'Oswald',sans-serif;font-size:64px;font-weight:700;color:var(--purple-lt);line-height:1;}
+.fc-role{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--white-dim);margin-top:10px;line-height:1.6;}
+.fc-name{font-family:'Oswald',sans-serif;font-size:38px;font-weight:700;color:var(--white);margin-bottom:4px;}
+.fc-title{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:20px;}
+.fc-body{font-size:15px;line-height:1.85;color:var(--white-dim);margin-bottom:20px;}
+.fc-phil{padding:24px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);font-size:16px;font-style:italic;font-weight:300;color:var(--white-dim);line-height:1.65;}
+.fc-phil strong{color:var(--white);font-style:normal;}
+
+/* ══════════════════════════════════════════
+   DEVELOPMENT PAGE
+══════════════════════════════════════════ */
+.dev-grid{display:grid;grid-template-columns:360px 1fr;gap:4px;margin-top:64px;}
+.dev-tabs{display:flex;flex-direction:column;}
+.dev-tab{display:flex;align-items:center;gap:18px;padding:20px 24px;cursor:pointer;border:1px solid rgba(96,47,150,.2);border-bottom:none;background:rgba(13,27,62,.5);transition:all .25s;}
+.dev-tab:last-child{border-bottom:1px solid rgba(96,47,150,.2);}
+.dev-tab:hover{background:rgba(96,47,150,.1);}
+.dev-tab.on{background:var(--purple-dk);border-color:var(--purple);}
+.dt-n{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:2px;color:var(--white-dim);min-width:26px;}
+.dev-tab.on .dt-n{color:var(--purple-lt);}
+.dt-lbl{font-family:'Barlow Condensed',sans-serif;font-size:13.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--white-dim);flex:1;}
+.dev-tab.on .dt-lbl{color:var(--white);}
+.dt-arrow{font-size:14px;color:var(--white-low);}
+.dev-tab.on .dt-arrow{color:var(--purple-lt);}
+.dev-panel{background:rgba(96,47,150,.12);border:1px solid rgba(96,47,150,.25);padding:52px;transition:opacity .3s;}
+.dp-h{font-family:'Oswald',sans-serif;font-size:48px;font-weight:600;color:var(--white);margin-bottom:20px;}
+.dp-b{font-size:15px;color:var(--white-dim);line-height:1.85;margin-bottom:28px;}
+.dp-tags{display:flex;flex-wrap:wrap;gap:7px;}
+.dp-tag{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;border:1px solid rgba(96,47,150,.4);color:var(--white-dim);transition:all .2s;}
+.dp-tag:hover{border-color:var(--purple-lt);color:var(--purple-lt);}
+
+/* ══════════════════════════════════════════
+   RECRUITING PAGE
+══════════════════════════════════════════ */
+.rec-intro{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.rec-cards{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:64px;}
+.rec-card{background:rgba(96,47,150,.07);padding:44px;border:1px solid rgba(96,47,150,.2);transition:background .3s;}
+.rec-card:hover{background:rgba(96,47,150,.15);}
+.rc-n{font-family:'Oswald',sans-serif;font-size:52px;font-weight:700;color:var(--purple-lt);line-height:1;margin-bottom:18px;}
+.rc-t{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--white);margin-bottom:10px;}
+.rc-b{font-size:13.5px;color:var(--white-dim);line-height:1.8;}
+.rec-faq{margin-top:64px;border-top:1px solid rgba(96,47,150,.2);padding-top:48px;}
+
+/* ══════════════════════════════════════════
+   NIL PAGE
+══════════════════════════════════════════ */
+.nil-page-header{background:var(--purple-dk);padding:100px 52px;border-bottom:1px solid rgba(96,47,150,.4);position:relative;overflow:hidden;}
+.nil-wm{position:absolute;right:-40px;top:50%;transform:translateY(-50%);font-family:'Oswald',sans-serif;font-size:300px;font-weight:700;color:rgba(244,242,248,.04);line-height:1;pointer-events:none;}
+.nil-three{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:64px;}
+.nil-card{background:rgba(96,47,150,.1);padding:44px;border:1px solid rgba(96,47,150,.25);transition:background .25s;}
+.nil-card:hover{background:rgba(96,47,150,.2);}
+.nil-icon{font-family:'Oswald',sans-serif;font-size:52px;font-weight:600;color:var(--purple-lt);margin-bottom:18px;}
+.nil-t{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--white);margin-bottom:10px;}
+.nil-b{font-size:13.5px;color:var(--white-dim);line-height:1.8;}
+
+/* ══════════════════════════════════════════
+   PLACEMENTS PAGE
+══════════════════════════════════════════ */
+.alumni-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:48px;margin-bottom:4px;}
+.alum-stat{background:rgba(96,47,150,.12);padding:32px;border:1px solid rgba(96,47,150,.2);text-align:center;}
+.alum-n{font-family:'Oswald',sans-serif;font-size:52px;font-weight:700;color:var(--purple-lt);line-height:1;display:block;}
+.alum-l{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--white-dim);display:block;margin-top:8px;}
+.place-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid rgba(96,47,150,.2);}
+.place-card{padding:36px 32px;border-right:1px solid rgba(96,47,150,.15);border-bottom:1px solid rgba(96,47,150,.15);transition:background .25s;}
+.place-card:nth-child(4n){border-right:none;}
+.place-card:hover{background:rgba(96,47,150,.08);}
+.pc-name{font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;color:var(--white);margin-bottom:6px;}
+.pc-school{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--purple-lt);}
+
+/* ══════════════════════════════════════════
+   PARENTS PAGE
+══════════════════════════════════════════ */
+.parents-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;}
+.faq{margin-top:40px;}
+.faq-item{border-bottom:1px solid rgba(96,47,150,.15);}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:18px 0;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--white);transition:color .2s;background:none;border:none;width:100%;text-align:left;}
+.faq-q:hover{color:var(--purple-lt);}
+.faq-tog{font-family:'Courier Prime',monospace;font-size:20px;color:var(--purple-lt);transition:transform .3s;flex-shrink:0;}
+.faq-item.open .faq-tog{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;font-size:14px;color:var(--white-dim);line-height:1.85;transition:max-height .42s ease,padding .3s;}
+.faq-item.open .faq-a{max-height:300px;padding-bottom:20px;}
+.contact-box{background:var(--purple-dk);padding:52px;border:1px solid rgba(96,47,150,.4);}
+.cb-h{font-family:'Oswald',sans-serif;font-size:44px;font-weight:600;color:var(--white);letter-spacing:.5px;margin-bottom:4px;}
+.cb-s{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:36px;}
+.cb-row{display:flex;align-items:center;gap:16px;padding:15px 0;border-bottom:1px solid rgba(244,242,248,.08);}
+.cb-row:last-of-type{border-bottom:none;}
+.cb-txt{font-family:'Courier Prime',monospace;font-size:12.5px;color:var(--white-dim);}
+.cb-btns{margin-top:32px;display:flex;flex-direction:column;gap:10px;}
+.btn-wh{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;background:var(--white);color:var(--black);padding:14px;text-align:center;text-decoration:none;transition:background .2s;display:block;}
+.btn-wh:hover{background:var(--purple-lt);color:var(--white);}
+.btn-outline-sm{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;background:transparent;color:var(--white-dim);padding:14px;text-align:center;text-decoration:none;border:1px solid rgba(244,242,248,.2);transition:all .2s;display:block;}
+.btn-outline-sm:hover{border-color:var(--white);color:var(--white);}
+
+/* ══════════════════════════════════════════
+   SPONSORS PAGE
+══════════════════════════════════════════ */
+.sponsors-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;}
+.tier-list{display:flex;flex-direction:column;gap:3px;margin-top:40px;}
+.tier{display:flex;align-items:center;border:1px solid rgba(96,47,150,.2);transition:background .25s;}
+.tier:hover{background:rgba(96,47,150,.08);}
+.tier-label{background:var(--purple-dk);padding:20px 24px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--white);min-width:190px;border-right:1px solid rgba(96,47,150,.3);}
+.tier-price{font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;color:var(--purple-lt);padding:20px 28px;flex:1;}
+.tier-cta-link{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);padding:20px 24px;text-decoration:none;transition:color .2s;}
+.tier:hover .tier-cta-link{color:var(--purple-lt);}
+.perk-section{margin-bottom:28px;}
+.perk-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(96,47,150,.2);}
+.perk-item{display:flex;gap:12px;padding:8px 0;font-size:13.5px;color:var(--white-dim);line-height:1.5;}
+.perk-item::before{content:'✓';color:var(--purple-lt);font-weight:700;flex-shrink:0;}
+.compliance{margin-top:28px;padding:24px;background:rgba(96,47,150,.08);border:1px solid rgba(96,47,150,.2);font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:1.5px;color:var(--white-dim);line-height:1.8;}
+
+/* ══════════════════════════════════════════
+   GOLF / TRYOUTS PAGES
+══════════════════════════════════════════ */
+.golf-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:80px;align-items:start;}
+.golf-poster{background:var(--navy-dk);padding:60px;border:1px solid rgba(96,47,150,.3);}
+.gp-kicker{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:10px;}
+.gp-title{font-family:'Oswald',sans-serif;font-size:clamp(44px,6vw,76px);font-weight:700;line-height:.88;color:var(--white);letter-spacing:-1px;margin-bottom:24px;}
+.gp-date{font-size:14px;color:var(--white-dim);margin-bottom:36px;padding-top:24px;border-top:1px solid rgba(244,242,248,.1);}
+.gp-btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;background:var(--purple);color:var(--white);padding:16px 36px;text-decoration:none;display:inline-block;transition:background .2s;}
+.gp-btn:hover{background:var(--purple-lt);}
+.gp-perks{margin-top:40px;}
+.gp-perk{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid rgba(244,242,248,.07);font-size:13.5px;color:var(--white-dim);line-height:1.5;}
+.gp-perk::before{content:'→';color:var(--purple-lt);font-family:'Courier Prime',monospace;flex-shrink:0;}
+
+/* tryouts */
+.tryout-sheet{margin-top:40px;}
+.ts-hdr{background:var(--purple);padding:18px 28px;display:flex;justify-content:space-between;align-items:center;}
+.ts-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--white);font-weight:600;}
+.ts-status{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(244,242,248,.7);}
+.ts-row{display:flex;justify-content:space-between;align-items:center;padding:17px 28px;border-bottom:1px solid rgba(96,47,150,.12);background:rgba(13,27,62,.4);}
+.ts-k{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);}
+.ts-v{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;color:var(--white);text-align:right;}
+.ts-v.pur{color:var(--purple-lt);}
+.ts-btn{padding:22px 28px;background:rgba(13,27,62,.4);}
+.chk-title{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:16px;}
+.chk{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(244,242,248,.05);font-size:14px;color:var(--white-dim);line-height:1.5;}
+.chk::before{content:'›';color:var(--purple-lt);font-family:'Courier Prime',monospace;flex-shrink:0;}
+.try-note{margin-top:32px;padding:32px;background:rgba(96,47,150,.12);border-left:2px solid var(--purple);}
+.try-note p{font-size:17px;font-weight:300;font-style:italic;color:var(--white-dim);line-height:1.6;}
+.try-note strong{color:var(--white);font-style:normal;}
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer{background:var(--black);padding:72px 52px 36px;border-top:1px solid rgba(96,47,150,.25);}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px;padding-bottom:60px;border-bottom:1px solid rgba(244,242,248,.06);}
+.f-brand-n{font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;color:var(--white);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.f-brand-s{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:20px;}
+.f-desc{font-size:13px;color:rgba(244,242,248,.25);line-height:1.85;}
+.f-col-h{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:rgba(244,242,248,.25);margin-bottom:18px;}
+.f-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.f-col ul a{font-size:13px;color:rgba(244,242,248,.35);text-decoration:none;transition:color .2s;cursor:pointer;}
+.f-col ul a:hover{color:var(--purple-lt);}
+.footer-bot{display:flex;justify-content:space-between;align-items:center;}
+.f-copy{font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:rgba(244,242,248,.18);}
+.f-tag{font-family:'Barlow',sans-serif;font-style:italic;font-size:14px;color:rgba(96,47,150,.5);}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media(max-width:1100px){
+  .std-mini-grid{grid-template-columns:repeat(3,1fr);}
+  .smc:nth-child(3n){border-right:none;}
+  .smc:nth-child(4),.smc:nth-child(5),.smc:nth-child(6){border-top:1px solid rgba(96,47,150,.15);}
+}
+@media(max-width:960px){
+  nav{padding:14px 24px;} nav.up{padding:10px 24px;}
+  .nav-links,.nav-cta{display:none;} .hamburger{display:flex;}
+  #ann-bar{padding:10px 24px;}
+  .hero-inner{padding:110px 24px 60px;}
+  .hero-sub-row{grid-template-columns:1fr;gap:24px;}
+  .hero-stats{flex-wrap:wrap;gap:24px;}
+  .sec-pad,.sec-pad-sm,.upcoming-strip,.std-mini,.home-placements,.home-cta,.founder-section{padding:60px 24px;}
+  .events-list,.events-reg-box,.division-content,.events-filters,.division-tabs{padding-left:24px;padding-right:24px;}
+  .page-hero{padding:100px 24px 48px;}
+  .home-about,.about-body-grid,.rec-intro,.parents-grid,.sponsors-grid,.golf-grid{grid-template-columns:1fr;gap:40px;}
+  .rec-cards,.nil-three{grid-template-columns:1fr;}
+  .place-grid,.alumni-stats{grid-template-columns:1fr 1fr;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px;}
+  .footer-bot{flex-direction:column;gap:14px;}
+  .team-header{grid-template-columns:1fr;}
+  .sched-row{grid-template-columns:1fr;gap:6px;}
+  .event-row{grid-template-columns:1fr;gap:8px;}
+  .er-right{align-items:flex-start;}
+  .dev-grid{grid-template-columns:1fr;}
+  .apply-box{grid-template-columns:1fr;}
+  .erb-grid{grid-template-columns:1fr;}
+  .std-mini-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:480px){
+  .place-grid,.alumni-stats,.footer-top{grid-template-columns:1fr;}
+  .event-cards{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- ANNOUNCEMENT BAR -->
+<div id="ann-bar">
+  <div class="ann-track">
+    <div class="ann-items" id="ann-items">
+      <div class="ann-item"><b>NEXT UP:</b> NJSE Mini Camp · Apr 3–5 · New Jersey → <a href="mailto:info@scholarselitegirls.com?subject=Mini Camp Registration" style="color:var(--white);text-decoration:underline;">DM to Register</a></div>
+    </div>
+  </div>
+  <div class="ann-nav">
+    <button class="ann-btn" id="ann-prev">‹</button>
+    <button class="ann-btn" id="ann-next">›</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a class="nav-logo" onclick="navigate('home')" href="#">
+    <svg class="nav-logo-mark" viewBox="0 0 80 80" fill="none">
+      <circle cx="40" cy="40" r="36" stroke="#8B4FCB" stroke-width="2.5"/>
+      <circle cx="40" cy="40" r="26" stroke="#8B4FCB" stroke-width="2"/>
+      <line x1="40" y1="14" x2="40" y2="66" stroke="#8B4FCB" stroke-width="2.5"/>
+      <line x1="14" y1="40" x2="66" y2="40" stroke="#8B4FCB" stroke-width="2.5"/>
+      <path d="M40 14C28 14 18 26 18 40" stroke="#8B4FCB" stroke-width="2" fill="none"/>
+      <path d="M40 14C52 14 62 26 62 40" stroke="#8B4FCB" stroke-width="2" fill="none"/>
+      <path d="M40 66C28 66 18 54 18 40" stroke="#8B4FCB" stroke-width="2" fill="none"/>
+      <path d="M40 66C52 66 62 54 62 40" stroke="#8B4FCB" stroke-width="2" fill="none"/>
+    </svg>
+    <div>
+      <div class="nav-brand-name">Scholars Elite</div>
+      <div class="nav-brand-sub">Girls Basketball Academy</div>
+    </div>
+  </a>
+  <ul class="nav-links" id="nav-links">
+    <li><a onclick="navigate('about')" href="#">About</a></li>
+    <li><a onclick="navigate('teams')" href="#">Teams</a></li>
+    <li><a onclick="navigate('events')" href="#">Events</a></li>
+    <li><a onclick="navigate('recruiting')" href="#">Recruiting</a></li>
+    <li><a onclick="navigate('nil')" href="#">NIL</a></li>
+    <li><a onclick="navigate('parents')" href="#">Parents</a></li>
+    <li><a onclick="navigate('tryouts')" class="nav-cta" href="#">Tryouts →</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMob()"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob" id="mob">
+  <button class="mob-x" onclick="toggleMob()">Close ✕</button>
+  <a onclick="nav('about')">About</a>
+  <a onclick="nav('teams')">Teams</a>
+  <a onclick="nav('events')">Events</a>
+  <a onclick="nav('recruiting')">Recruiting</a>
+  <a onclick="nav('nil')">NIL</a>
+  <a onclick="nav('parents')">Parents</a>
+  <a onclick="nav('sponsors')">Sponsors</a>
+  <a onclick="nav('tryouts')">Tryouts</a>
+</div>
+
+<!-- ══════════════════════════════════
+     HOME PAGE
+══════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- Hero WebGL Court -->
+  <section id="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <div class="hero-badge" id="h-badge">Scholars Elite Academy · Est. 2026 · Girls Basketball</div>
+      <h1 class="hero-display">
+        <div class="ln"><span id="ln1">Development</span></div>
+        <div class="ln"><span id="ln2">Is The</span></div>
+        <div class="ln pur"><span id="ln3">Standard.</span></div>
+      </h1>
+      <div class="hero-rule" id="h-rule"></div>
+      <div class="hero-sub-row" id="h-sub">
+        <p class="hero-desc"><strong>Development &gt; Exposure.</strong> We don't chase rankings. We build complete players — skill, IQ, body, leadership, character. Serious athletes only.</p>
+        <div class="hero-stats">
+          <div><span class="hs-n" id="stat1">0</span><span class="hs-l">Yrs Experience</span></div>
+          <div><span class="hs-n" id="stat2">0</span><span class="hs-l">Divisions</span></div>
+        </div>
+      </div>
+      <div class="hero-actions" id="h-actions">
+        <a onclick="navigate('tryouts')" class="btn-pur" href="#">Register for Tryouts</a>
+        <a onclick="navigate('about')" class="btn-outline" href="#">Our Standard</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Events ticker -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="t-i">Development Is the Standard</span><span class="t-i">·</span>
+      <span class="t-i"><b>Apr 3–5</b> · NJSE Mini Camp · NJ</span><span class="t-i">·</span>
+      <span class="t-i"><b>Apr 10–12</b> · Western PA Bruins · Pittsburgh</span><span class="t-i">·</span>
+      <span class="t-i"><b>Apr 17–19</b> · LIVE! at the Nook · Manheim PA</span><span class="t-i">·</span>
+      <span class="t-i"><b>May 9–11</b> · Team Takeover · Washington DC</span><span class="t-i">·</span>
+      <span class="t-i"><b>May 15–17</b> · Select Events Showcase · Atlantic City</span><span class="t-i">·</span>
+      <span class="t-i"><b>Jun 22–26</b> · NJSE Shooting Camp · TBD</span><span class="t-i">·</span>
+      <span class="t-i"><b>Jul 10–13</b> · Run 4 The Roses · Louisville</span><span class="t-i">·</span>
+      <span class="t-i"><b>Jul 24–26</b> · The Finale · Hamilton OH</span><span class="t-i">·</span>
+      <span class="t-i">Opportunity Is Earned</span><span class="t-i">·</span>
+      <span class="t-i">Development Is the Standard</span><span class="t-i">·</span>
+      <span class="t-i"><b>Apr 3–5</b> · NJSE Mini Camp · NJ</span><span class="t-i">·</span>
+      <span class="t-i"><b>Apr 10–12</b> · Western PA Bruins · Pittsburgh</span><span class="t-i">·</span>
+      <span class="t-i"><b>Apr 17–19</b> · LIVE! at the Nook · Manheim PA</span><span class="t-i">·</span>
+      <span class="t-i"><b>May 9–11</b> · Team Takeover · Washington DC</span><span class="t-i">·</span>
+      <span class="t-i"><b>May 15–17</b> · Select Events Showcase · Atlantic City</span><span class="t-i">·</span>
+      <span class="t-i"><b>Jun 22–26</b> · NJSE Shooting Camp · TBD</span><span class="t-i">·</span>
+      <span class="t-i"><b>Jul 10–13</b> · Run 4 The Roses · Louisville</span><span class="t-i">·</span>
+      <span class="t-i"><b>Jul 24–26</b> · The Finale · Hamilton OH</span><span class="t-i">·</span>
+      <span class="t-i">Opportunity Is Earned</span><span class="t-i">·</span>
+    </div>
+  </div>
+
+  <!-- About teaser -->
+  <div class="home-about sec-pad">
+    <div class="rv">
+      <div class="kicker">Who We Are</div>
+      <div class="ha-quote">"Elite programs don't just produce <em>highlights</em> —<br>they produce <em>habits.</em><br>And habits compound."</div>
+      <p class="ha-body">Scholars Elite Academy is a development-first girls basketball program backed by 25+ years of grassroots experience. This is not recreational basketball. Every rep has purpose. Every player has a plan.</p>
+      <div class="ha-pills">
+        <span class="ha-pill">Development &gt; Exposure</span>
+        <span class="ha-pill">Standards-Based</span>
+        <span class="ha-pill">NIL Education</span>
+        <span class="ha-pill">Recruiting Pipeline</span>
+        <span class="ha-pill">No Guaranteed Minutes</span>
+      </div>
+      <div class="ha-actions">
+        <a onclick="navigate('about')" class="btn-pur" href="#">Our Philosophy</a>
+        <a onclick="navigate('recruiting')" class="btn-outline" href="#">Recruiting Pipeline</a>
+      </div>
+    </div>
+    <div class="rv">
+      <div style="background:var(--navy-dk);padding:52px;border:1px solid rgba(96,47,150,.3);">
+        <div class="kicker">The Standard</div>
+        <div style="display:flex;flex-direction:column;gap:0;border-top:1px solid rgba(244,242,248,.07);margin-top:8px;">
+          <div class="pillar"><span class="pl-n">01</span><span class="pl-t">Accountability Over Entitlement</span></div>
+          <div class="pillar"><span class="pl-n">02</span><span class="pl-t">Coachability Required</span></div>
+          <div class="pillar"><span class="pl-n">03</span><span class="pl-t">Academic Responsibility</span></div>
+          <div class="pillar"><span class="pl-n">04</span><span class="pl-t">Process Over Promises</span></div>
+          <div class="pillar"><span class="pl-n">05</span><span class="pl-t">NIL Awareness</span></div>
+          <div class="pillar"><span class="pl-n">06</span><span class="pl-t">Family Partnership</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Home CTA -->
+  <div class="home-cta">
+    <div style="position:relative;z-index:1;">
+      <span class="hc-kicker">Applications Open · Limited Spots Per Division</span>
+      <h2 class="hc-h">Ready To<br><em>Earn</em> It?</h2>
+      <p class="hc-sub">Development is the Standard. Opportunity is Earned.</p>
+      <div class="hc-btns">
+        <a href="mailto:info@scholarselitegirls.com?subject=Scholars Elite Application" class="btn-pur" style="padding:18px 52px;font-size:14px;">Apply Now</a>
+        <a onclick="navigate('tryouts')" class="btn-outline" href="#" style="padding:18px 52px;font-size:14px;">2026 Tryouts</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-top">
+      <div>
+        <div class="f-brand-n">Scholars Elite</div>
+        <div class="f-brand-s">Girls Basketball Academy · New Jersey</div>
+        <div class="f-desc">Development is the Standard. Opportunity is Earned. Building elite women athletes — on the court, in the classroom, and beyond.</div>
+      </div>
+      <div class="f-col">
+        <div class="f-col-h">Program</div>
+        <ul>
+          <li><a onclick="navigate('about')">About</a></li>
+          <li><a onclick="navigate('teams')">Teams</a></li>
+          <li><a onclick="navigate('development')">Development</a></li>
+          <li><a onclick="navigate('nil')">NIL Education</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <div class="f-col-h">Join</div>
+        <ul>
+          <li><a onclick="navigate('tryouts')">Tryouts</a></li>
+          <li><a onclick="navigate('events')">Events</a></li>
+          <li><a onclick="navigate('recruiting')">Recruiting</a></li>
+          <li><a onclick="navigate('parents')">Parents</a></li>
+          <li><a href="mailto:info@scholarselitegirls.com?subject=Application">Apply Now</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <div class="f-col-h">Westview Group</div>
+        <ul>
+          <li><a onclick="navigate('sponsors')">Sponsorships</a></li>
+          <li><a onclick="navigate('golf')">Golf Invitational</a></li>
+          <li><a href="mailto:keil@westviewsports.com?subject=NIL Deal Desk">NIL Deal Desk</a></li>
+          <li><a href="mailto:keil@westviewsports.com?subject=4PN Inquiry">4PN Platform</a></li>
+          <li><a href="mailto:keil@westviewsports.com">Contact TWG</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bot">
+      <div class="f-copy">© 2026 Scholars Elite Academy · New Jersey · Director: Sal Racobaldo</div>
+      <div class="f-tag">Development · Discipline · Opportunity</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════
+     TEAMS PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-teams">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">Team Structure</div>
+      <h1 class="page-h1">Two Tracks.<br><em>One Standard.</em></h1>
+      <p class="page-sub">Scholars Elite operates an Academy track and a Select/National track at each age level. Placement is based on readiness — not age alone. We build teams to develop players, not collect fees.</p>
+    </div>
+  </div>
+
+  <!-- Two-Track explainer -->
+  <div style="background:var(--purple-dk);padding:48px 52px;border-bottom:1px solid rgba(96,47,150,.4);">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;max-width:960px;">
+      <div>
+        <div class="kicker">Track One</div>
+        <h3 style="font-family:Oswald,sans-serif;font-size:28px;font-weight:700;color:var(--white);margin-bottom:12px;">Academy</h3>
+        <p style="font-size:14px;color:var(--white-dim);line-height:1.85;">Development-first environment. Focused on skill acquisition, habits, and readiness. Athletes who need structure before competition. Not a lesser path — the correct path for building confidence and competence.</p>
+      </div>
+      <div>
+        <div class="kicker">Track Two</div>
+        <h3 style="font-family:Oswald,sans-serif;font-size:28px;font-weight:700;color:var(--purple-lt);margin-bottom:12px;">Select / National</h3>
+        <p style="font-size:14px;color:var(--white-dim);line-height:1.85;">Competitive teams for athletes prepared for higher-level competition and evaluation. Roster spots are earned. Expectations are high. Movement between tracks is intentional and performance-based.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="division-tabs" id="divTabs">
+    <button class="div-tab on" onclick="setDiv(0)">Middle School</button>
+    <button class="div-tab" onclick="setDiv(1)">15U</button>
+    <button class="div-tab" onclick="setDiv(2)">16U</button>
+    <button class="div-tab" onclick="setDiv(3)">17U</button>
+    <button class="div-tab" onclick="setDiv(4)">Academy / Dev</button>
+    <button class="div-tab" onclick="setDiv(5)">HS Select / National</button>
+  </div>
+
+  <div class="division-content">
+
+    <!-- MIDDLE SCHOOL -->
+    <div class="div-panel on" id="div-0">
+      <div class="team-header">
+        <div class="team-badge"><div class="tb-age" style="font-size:48px;letter-spacing:-2px;">MS</div><div class="tb-rule"></div><div class="tb-level">Grades 6–8</div><div class="tb-label">Foundation</div></div>
+        <div class="team-info-col">
+          <h2>Scholars Elite Middle School</h2>
+          <p>This is the foundation stage of the Scholars Elite pipeline. The focus is teaching athletes how to train, how to compete, and how to learn. No recruiting pressure. No exposure chase. Just the habits and fundamentals that define a career.</p>
+          <p>Middle school athletes are coached directly by Middle School Director Bernie Hynson, whose primary mission is long-term development — not short-term results. Development-appropriate competition, controlled environments, and confidence built through correct reps.</p>
+          <div class="team-focus-list">
+            <span class="tf-tag">Fundamental Skills</span><span class="tf-tag">Footwork &amp; Positioning</span><span class="tf-tag">Decision-Making</span><span class="tf-tag">Defensive Habits</span><span class="tf-tag">Accountability</span><span class="tf-tag">Confidence Building</span>
+          </div>
+          <div style="margin-top:24px;padding:20px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);">
+            <p style="font-family:Courier Prime,monospace;font-size:10px;letter-spacing:1.5px;line-height:2;color:rgba(244,242,248,.5);">RECRUITING CONTEXT: None. At this stage, the priority is skill and habits — not visibility.</p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-section">
+        <div class="sched-title">2026 Schedule</div>
+        <div class="sched-month">April</div>
+        <div class="sched-row"><div class="sr-date">Apr 3–5</div><div><div class="sr-name">NJSE Mini Camp</div><div class="sr-name-sub">Skills + fundamentals. Purposeful reps.</div></div><div class="sr-loc">New Jersey</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Apr 10–12</div><div><div class="sr-name">Western PA Bruins · Spring</div></div><div class="sr-loc">Pittsburgh, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">May</div>
+        <div class="sched-row"><div class="sr-date">May 9–11</div><div><div class="sr-name">Cinco de Mayo · Team Takeover</div></div><div class="sr-loc">Washington, DC</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-month">June</div>
+        <div class="sched-row"><div class="sr-date">Jun 22–26</div><div><div class="sr-name">NJSE Shooting Camp</div><div class="sr-name-sub">Mechanics, footwork, decision shooting.</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-month">July</div>
+        <div class="sched-row"><div class="sr-date">Jul 6–9</div><div><div class="sr-name">Position Camp</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-month" style="color:var(--white-dim);font-size:18px;">Coming Soon · TBD</div>
+        <div class="sched-row"><div class="sr-date">Sept 2026</div><div><div class="sr-name">Middle School Development Festival</div><div class="sr-name-sub">Teaching over winning. Skill reps in controlled competition. Not a recruiting event.</div></div><div class="sr-loc">NJ</div><div class="sr-type camp">Scholars Elite Event</div></div>
+        <div class="sched-row"><div class="sr-date">TBD</div><div><div class="sr-name">NJ Scholars Day</div></div><div class="sr-loc">TBD</div><div class="sr-type tbd">TBD</div></div>
+      </div>
+      <div class="apply-box">
+        <div><div class="ab-h">Apply for Middle School</div><div class="ab-b">Open tryouts March 7 · 1:00 PM · Bishop Eustace HS. Email or DM with: Athlete Name · Grade · Position · School.</div></div>
+        <div class="ab-btns"><a href="mailto:info@scholarselitegirls.com?subject=Middle School Application" class="btn-pur">Register Now</a><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline">DM on Instagram</a></div>
+      </div>
+    </div>
+
+    <!-- 15U -->
+    <div class="div-panel" id="div-1">
+      <div class="team-header">
+        <div class="team-badge"><div class="tb-age">15U</div><div class="tb-rule"></div><div class="tb-level">Division</div><div class="tb-label">Transitional</div></div>
+        <div class="team-info-col">
+          <h2>Scholars Elite 15U</h2>
+          <p>15U is the transition year — from foundational development to performance-based training. Athletes begin to learn what is required to compete at higher levels: physically, mentally, and emotionally. Skill progression under pressure. Game pace. Film introduction.</p>
+          <p>Competition is regional and selective travel. Emphasis on meaningful minutes and role clarity. Recruiting awareness begins here — families are educated on timelines and expectations without accelerating the process prematurely.</p>
+          <div class="team-focus-list">
+            <span class="tf-tag">Skill Under Pressure</span><span class="tf-tag">Game Pace</span><span class="tf-tag">Film Intro</span><span class="tf-tag">Strength Foundations</span><span class="tf-tag">Role Clarity</span><span class="tf-tag">Recruiting Awareness</span>
+          </div>
+          <div style="margin-top:24px;padding:20px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);">
+            <p style="font-family:Courier Prime,monospace;font-size:10px;letter-spacing:1.5px;line-height:2;color:rgba(244,242,248,.5);">RECRUITING CONTEXT: Early awareness only. Timelines + expectations education — no accelerated exposure.</p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-section">
+        <div class="sched-title">2026 Schedule</div>
+        <div class="sched-month">April</div>
+        <div class="sched-row"><div class="sr-date">Apr 3–5</div><div><div class="sr-name">NJSE Mini Camp</div></div><div class="sr-loc">New Jersey</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Apr 10–12</div><div><div class="sr-name">Western PA Bruins · Spring</div></div><div class="sr-loc">Pittsburgh, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-row"><div class="sr-date">Apr 17–19</div><div><div class="sr-name">LIVE! at the Nook</div><div class="sr-name-sub">High-level. Evaluated every possession.</div></div><div class="sr-loc">Manheim, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">May</div>
+        <div class="sched-row"><div class="sr-date">May 9–11</div><div><div class="sr-name">Cinco de Mayo · Team Takeover</div></div><div class="sr-loc">Washington, DC</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">May 15–17</div><div><div class="sr-name">Select Events · Spring Showcase</div></div><div class="sr-loc">Atlantic City, NJ</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-month">June</div>
+        <div class="sched-row"><div class="sr-date">Jun 22–26</div><div><div class="sr-name">NJSE Shooting Camp</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-month">July</div>
+        <div class="sched-row"><div class="sr-date">Jul 6–9</div><div><div class="sr-name">Position Camp</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Jul 24–26</div><div><div class="sr-name">The Finale</div></div><div class="sr-loc">Hamilton, OH</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">TBD</div><div><div class="sr-name">I-95 Classic</div></div><div class="sr-loc">TBD</div><div class="sr-type tbd">TBD</div></div>
+      </div>
+      <div class="apply-box">
+        <div><div class="ab-h">Apply for 15U</div><div class="ab-b">High school tryouts are invite-only. Contact us to request evaluation. Include: Name · Grade · Position · School.</div></div>
+        <div class="ab-btns"><a href="mailto:info@scholarselitegirls.com?subject=15U Application" class="btn-pur">Request Evaluation</a><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline">DM on Instagram</a></div>
+      </div>
+    </div>
+
+    <!-- 16U -->
+    <div class="div-panel" id="div-2">
+      <div class="team-header">
+        <div class="team-badge"><div class="tb-age">16U</div><div class="tb-rule"></div><div class="tb-level">Division</div><div class="tb-label">Competitive</div></div>
+        <div class="team-info-col">
+          <h2>Scholars Elite 16U</h2>
+          <p>16U is where development meets visibility. Athletes must be able to execute skills consistently against high-level competition while continuing to refine weaknesses. Advanced skill packages by position. Film breakdown. Mental discipline. Physical preparation for the demands of national competition.</p>
+          <p>Head Coach Chris Dawley leads the 16U program. Strategic event selection — matchups designed to challenge, not protect, athletes. College coaches are on the sideline. Show up prepared.</p>
+          <div class="team-focus-list">
+            <span class="tf-tag">Advanced Skill Packages</span><span class="tf-tag">Physical Preparation</span><span class="tf-tag">Film Breakdown</span><span class="tf-tag">Mental Discipline</span><span class="tf-tag">Recruiting Prep</span><span class="tf-tag">National Competition</span>
+          </div>
+          <div style="margin-top:24px;padding:20px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);">
+            <p style="font-family:Courier Prime,monospace;font-size:10px;letter-spacing:1.5px;line-height:2;color:rgba(244,242,248,.5);">RECRUITING CONTEXT: Active preparation. Recruiting timelines, film standards, coach communication, fit evaluation — no promises, no shortcuts.</p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-section">
+        <div class="sched-title">2026 Schedule</div>
+        <div class="sched-month">April</div>
+        <div class="sched-row"><div class="sr-date">Apr 3–5</div><div><div class="sr-name">NJSE Mini Camp</div></div><div class="sr-loc">New Jersey</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Apr 10–12</div><div><div class="sr-name">Western PA Bruins · Spring</div></div><div class="sr-loc">Pittsburgh, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-row"><div class="sr-date">Apr 17–19</div><div><div class="sr-name">LIVE! at the Nook</div></div><div class="sr-loc">Manheim, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">May</div>
+        <div class="sched-row"><div class="sr-date">May 9–11</div><div><div class="sr-name">Cinco de Mayo · Team Takeover</div></div><div class="sr-loc">Washington, DC</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">May 15–17</div><div><div class="sr-name">Select Events · Spring Showcase</div></div><div class="sr-loc">Atlantic City, NJ</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-month">June</div>
+        <div class="sched-row"><div class="sr-date">Jun 22–26</div><div><div class="sr-name">NJSE Shooting Camp</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Jun 26–28</div><div><div class="sr-name">North Tartan Summer Jam</div></div><div class="sr-loc">Minneapolis, MN</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">July</div>
+        <div class="sched-row"><div class="sr-date">Jul 6–9</div><div><div class="sr-name">Position Camp</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Jul 10–13</div><div><div class="sr-name">Run 4 The Roses</div><div class="sr-name-sub">Prepared, not hopeful.</div></div><div class="sr-loc">Louisville, KY</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">Jul 24–26</div><div><div class="sr-name">The Finale</div></div><div class="sr-loc">Hamilton, OH</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">TBD</div><div><div class="sr-name">Turnpike Challenge</div></div><div class="sr-loc">TBD</div><div class="sr-type tbd">TBD</div></div>
+      </div>
+      <div class="apply-box">
+        <div><div class="ab-h">Apply for 16U</div><div class="ab-b">Invite-only. You will be evaluated by college coaches at national events. Arrive ready.</div></div>
+        <div class="ab-btns"><a href="mailto:info@scholarselitegirls.com?subject=16U Application" class="btn-pur">Request Evaluation</a><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline">DM on Instagram</a></div>
+      </div>
+    </div>
+
+    <!-- 17U -->
+    <div class="div-panel" id="div-3">
+      <div class="team-header">
+        <div class="team-badge"><div class="tb-age">17U</div><div class="tb-rule"></div><div class="tb-level">Division</div><div class="tb-label">Decision Year</div></div>
+        <div class="team-info-col">
+          <h2>Scholars Elite 17U</h2>
+          <p>17U is the execution stage. Athletes are expected to perform, lead, and present themselves as contributors ready for the next level. Role clarity. Efficiency. Advanced reads. Leadership and communication. Preparation for college environments.</p>
+          <p>Head Coach Kevin Slaughter (Philadelphia Public League Champion, Audenreid) leads the 17U program. Select national exposure events. Purposeful scheduling aligned with recruiting windows. High-level competition that reflects next-level expectations. We do not sell placement — we prepare athletes to earn it.</p>
+          <div class="team-focus-list">
+            <span class="tf-tag">Role Efficiency</span><span class="tf-tag">Advanced Reads</span><span class="tf-tag">Leadership</span><span class="tf-tag">Recruiting Profile</span><span class="tf-tag">Offer Evaluation</span><span class="tf-tag">NIL Curriculum</span>
+          </div>
+          <div style="margin-top:24px;padding:20px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);">
+            <p style="font-family:Courier Prime,monospace;font-size:10px;letter-spacing:1.5px;line-height:2;color:rgba(244,242,248,.5);">RECRUITING CONTEXT: Active and individualized. Offer eval, commitment strategy, fit analysis. No promises. No shortcuts.</p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-section">
+        <div class="sched-title">2026 Schedule</div>
+        <div class="sched-month">April</div>
+        <div class="sched-row"><div class="sr-date">Apr 3–5</div><div><div class="sr-name">NJSE Mini Camp</div></div><div class="sr-loc">New Jersey</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Apr 10–12</div><div><div class="sr-name">Western PA Bruins · Spring</div></div><div class="sr-loc">Pittsburgh, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-row"><div class="sr-date">Apr 17–19</div><div><div class="sr-name">LIVE! at the Nook</div></div><div class="sr-loc">Manheim, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">May</div>
+        <div class="sched-row"><div class="sr-date">May 9–11</div><div><div class="sr-name">Cinco de Mayo · Team Takeover</div></div><div class="sr-loc">Washington, DC</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">May 15–17</div><div><div class="sr-name">Select Events · Spring Showcase</div></div><div class="sr-loc">Atlantic City, NJ</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-month">June</div>
+        <div class="sched-row"><div class="sr-date">Jun 22–26</div><div><div class="sr-name">NJSE Shooting Camp</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Jun 26–28</div><div><div class="sr-name">North Tartan Summer Jam</div></div><div class="sr-loc">Minneapolis, MN</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">July</div>
+        <div class="sched-row"><div class="sr-date">Jul 6–9</div><div><div class="sr-name">Position Camp</div></div><div class="sr-loc">TBD</div><div class="sr-type camp">Camp</div></div>
+        <div class="sched-row"><div class="sr-date">Jul 10–13</div><div><div class="sr-name">Run 4 The Roses</div><div class="sr-name-sub">One of the biggest stages. The commitment window is open.</div></div><div class="sr-loc">Louisville, KY</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">Jul 24–26</div><div><div class="sr-name">The Finale</div><div class="sr-name-sub">Finish the summer the right way.</div></div><div class="sr-loc">Hamilton, OH</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">TBD</div><div><div class="sr-name">Catholic League Challenge</div></div><div class="sr-loc">TBD</div><div class="sr-type tbd">TBD</div></div>
+      </div>
+      <div class="apply-box">
+        <div><div class="ab-h">Apply for 17U</div><div class="ab-b">This is the decision year. If you are ready for that level of commitment and accountability — we want to hear from you.</div></div>
+        <div class="ab-btns"><a href="mailto:info@scholarselitegirls.com?subject=17U Application" class="btn-pur">Request Evaluation</a><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline">DM on Instagram</a></div>
+      </div>
+    </div>
+
+    <!-- ACADEMY / DEVELOPMENTAL -->
+    <div class="div-panel" id="div-4">
+      <div class="team-header">
+        <div class="team-badge"><div class="tb-age" style="font-size:38px;letter-spacing:-1px;">ACD</div><div class="tb-rule"></div><div class="tb-level">Track One</div><div class="tb-label">Academy</div></div>
+        <div class="team-info-col">
+          <h2>Scholars Elite Academy / Developmental</h2>
+          <p>The Academy track exists for athletes who need structured development before competitive exposure. This is not a lesser path — it is the correct path for athletes who want to build confidence, skill, and consistency before the pressure of national competition.</p>
+          <p>Technical skill rebuilding or refinement. Strength, movement, coordination. Game understanding and spacing. Accountability habits. Athletes move into Select teams when readiness is demonstrated — not on a timeline, not because of age. Because they earned it.</p>
+          <div class="team-focus-list">
+            <span class="tf-tag">Technical Skill Refinement</span><span class="tf-tag">Movement &amp; Coordination</span><span class="tf-tag">Game Understanding</span><span class="tf-tag">Accountability Habits</span><span class="tf-tag">Confidence Building</span><span class="tf-tag">No Recruiting Pressure</span>
+          </div>
+          <div style="margin-top:24px;padding:20px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);">
+            <p style="font-family:Courier Prime,monospace;font-size:10px;letter-spacing:1.5px;line-height:2;color:rgba(244,242,248,.5);">RECRUITING CONTEXT: Preparation only. No timelines forced. Athletes advance to Select when readiness is demonstrated.</p>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:40px;padding:36px;background:rgba(96,47,150,.08);border:1px solid rgba(96,47,150,.2);">
+        <div class="kicker">Movement Between Tracks</div>
+        <p style="font-size:14px;color:var(--white-dim);line-height:1.85;max-width:640px;">Placement is not static. Athletes may move Academy → Select → National. Movement is based on skill progression, coachability, consistency, and accountability. We reward development — not entitlement.</p>
+      </div>
+      <div class="apply-box" style="margin-top:4px;">
+        <div><div class="ab-h">Apply for Academy Track</div><div class="ab-b">Middle school tryouts March 7 · 1:00 PM · Bishop Eustace HS. Email or DM to begin.</div></div>
+        <div class="ab-btns"><a href="mailto:info@scholarselitegirls.com?subject=Academy Track Application" class="btn-pur">Apply Now</a><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline">DM on Instagram</a></div>
+      </div>
+    </div>
+
+    <!-- HS SELECT / NATIONAL -->
+    <div class="div-panel" id="div-5">
+      <div class="team-header">
+        <div class="team-badge"><div class="tb-age" style="font-size:30px;letter-spacing:-1px;line-height:1;">HS<br>SEL</div><div class="tb-rule"></div><div class="tb-level">Track Two</div><div class="tb-label">National</div></div>
+        <div class="team-info-col">
+          <h2>Scholars Elite HS Select / National</h2>
+          <p>The highest competitive level within Scholars Elite. Roster spots are earned. Expectations are high. This team represents the program at national-level events where college coaches are evaluating every possession.</p>
+          <p>Performance consistency. Advanced scouting and film preparation. Efficiency, role execution, and leadership. Professional habits on and off the court. Active and individualized recruiting — offer evaluation across basketball, academics, and environment. Preparation for the transition to college programs.</p>
+          <div class="team-focus-list">
+            <span class="tf-tag">National-Level Events</span><span class="tf-tag">Performance Consistency</span><span class="tf-tag">Scouting &amp; Film</span><span class="tf-tag">Role Execution</span><span class="tf-tag">Offer Evaluation</span><span class="tf-tag">NIL Education</span>
+          </div>
+          <div style="margin-top:24px;padding:20px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);">
+            <p style="font-family:Courier Prime,monospace;font-size:10px;letter-spacing:1.5px;line-height:2;color:rgba(244,242,248,.5);">RECRUITING CONTEXT: Active and individualized. Final-stage decisions, fit evaluation, transition preparation. This team is for athletes ready to compete, be evaluated, and be accountable.</p>
+          </div>
+        </div>
+      </div>
+      <div class="schedule-section">
+        <div class="sched-title">2026 Schedule · Select / National</div>
+        <div class="sched-month">April</div>
+        <div class="sched-row"><div class="sr-date">Apr 17–19</div><div><div class="sr-name">LIVE! at the Nook</div><div class="sr-name-sub">National-level. Evaluated every possession.</div></div><div class="sr-loc">Manheim, PA</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">May</div>
+        <div class="sched-row"><div class="sr-date">May 15–17</div><div><div class="sr-name">Select Events · Spring Showcase</div><div class="sr-name-sub">Recruiting visibility for athletes who can execute.</div></div><div class="sr-loc">Atlantic City, NJ</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-month">June</div>
+        <div class="sched-row"><div class="sr-date">Jun 26–28</div><div><div class="sr-name">North Tartan Summer Jam</div></div><div class="sr-loc">Minneapolis, MN</div><div class="sr-type travel">Team Travel</div></div>
+        <div class="sched-month">July</div>
+        <div class="sched-row"><div class="sr-date">Jul 10–13</div><div><div class="sr-name">Run 4 The Roses</div><div class="sr-name-sub">One of the biggest stages. Prepared, not hopeful.</div></div><div class="sr-loc">Louisville, KY</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">Jul 24–26</div><div><div class="sr-name">The Finale</div></div><div class="sr-loc">Hamilton, OH</div><div class="sr-type travel">Showcase</div></div>
+        <div class="sched-row"><div class="sr-date">TBD</div><div><div class="sr-name">Scholars Elite High School Event 2027</div><div class="sr-name-sub">Structured competition. Evaluation-appropriate environments. Details TBD.</div></div><div class="sr-loc">TBD</div><div class="sr-type tbd">Planning Phase</div></div>
+      </div>
+      <div class="apply-box">
+        <div><div class="ab-h">Apply for HS Select / National</div><div class="ab-b">High school tryouts are invite-only. If you believe you belong here, request an evaluation. Show us on film and on the floor.</div></div>
+        <div class="ab-btns"><a href="mailto:info@scholarselitegirls.com?subject=HS Select National Application" class="btn-pur">Request Evaluation</a><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline">DM on Instagram</a></div>
+      </div>
+    </div>
+
+  </div><!-- /division-content -->
+</div><!-- /page-teams -->
+
+<!-- ══════════════════════════════════
+     EVENTS PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-events">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">2026 Season</div>
+      <h1 class="page-h1">Camps. Clinics.<br><em>Elite Travel Events.</em></h1>
+      <p class="page-sub">No fluff — just reps that translate. Camps are open registration. Travel events are roster-based.</p>
+    </div>
+  </div>
+
+  <div class="events-filters">
+    <button class="ef-chip on" onclick="filterEvents('all',this)">All Events</button>
+    <button class="ef-chip" onclick="filterEvents('camp',this)">#Camps</button>
+    <button class="ef-chip" onclick="filterEvents('travel',this)">#TeamTravel</button>
+    <button class="ef-chip" onclick="filterEvents('showcase',this)">#Showcase</button>
+    <button class="ef-chip" onclick="filterEvents('tbd',this)">#TBD</button>
+  </div>
+
+  <div class="events-list">
+    <div class="em-header">April</div>
+    <div class="event-row" data-tags="camp"><div class="er-date">Apr 3–5, 2026</div><div class="er-main"><div class="er-name">NJSE Mini Camp</div><div class="er-desc">A skills-first weekend built around fundamentals, pace, and decision-making. Development-first environment. Accountability + structure. Every rep has a purpose.</div><div class="er-tags"><span class="er-tag camp">#Camps</span><span class="er-tag">New Jersey</span></div></div><div class="er-right"><div class="er-loc">New Jersey</div><a href="mailto:info@scholarselitegirls.com?subject=Mini Camp Registration" class="btn-pur" style="padding:12px 24px;font-size:12px;">DM to Register</a></div></div>
+    <div class="event-row" data-tags="travel"><div class="er-date">Apr 10–12, 2026</div><div class="er-main"><div class="er-name">Western PA Bruins · Spring</div><div class="er-desc">Competitive weekend focused on execution and role clarity. Team travel event — roster-based. If you're on the team, you're on the clock.</div><div class="er-tags"><span class="er-tag">#TeamTravel</span><span class="er-tag">Pittsburgh, PA</span></div></div><div class="er-right"><div class="er-loc">Pittsburgh, PA</div><a href="mailto:info@scholarselitegirls.com?subject=Western PA Bruins" class="btn-outline" style="padding:12px 24px;font-size:12px;">Team Travel (Roster)</a></div></div>
+    <div class="event-row" data-tags="travel"><div class="er-date">Apr 17–19, 2026</div><div class="er-main"><div class="er-name">LIVE! at the Nook</div><div class="er-desc">High-level environment. You're evaluated every possession. One of the premiere spring events in the region — preparation is the prerequisite.</div><div class="er-tags"><span class="er-tag">#TeamTravel</span><span class="er-tag">Manheim, PA</span></div></div><div class="er-right"><div class="er-loc">Manheim, PA</div><a href="mailto:info@scholarselitegirls.com?subject=LIVE at the Nook" class="btn-outline" style="padding:12px 24px;font-size:12px;">Team Travel (Roster)</a></div></div>
+
+    <div class="em-header">May</div>
+    <div class="event-row" data-tags="travel showcase"><div class="er-date">May 9–11, 2026</div><div class="er-main"><div class="er-name">Cinco de Mayo · Team Takeover</div><div class="er-desc">A stage for players who are ready. Preparation shows up here. National-level competition in the nation's capital — you earn your spot on this floor.</div><div class="er-tags"><span class="er-tag camp">#Showcase</span><span class="er-tag">#TeamTravel</span><span class="er-tag">Washington, DC</span></div></div><div class="er-right"><div class="er-loc">Washington, DC</div><a href="mailto:info@scholarselitegirls.com?subject=Team Takeover" class="btn-outline" style="padding:12px 24px;font-size:12px;">Team Travel (Roster)</a></div></div>
+    <div class="event-row" data-tags="travel showcase"><div class="er-date">May 15–17, 2026</div><div class="er-main"><div class="er-name">Select Events · Spring Showcase</div><div class="er-desc">Competitive reps + recruiting visibility for athletes who can execute. College coaches attend. Show up prepared, not hoping.</div><div class="er-tags"><span class="er-tag camp">#Showcase</span><span class="er-tag">#TeamTravel</span><span class="er-tag">Atlantic City, NJ</span></div></div><div class="er-right"><div class="er-loc">Atlantic City, NJ</div><a href="mailto:info@scholarselitegirls.com?subject=Select Events Showcase" class="btn-outline" style="padding:12px 24px;font-size:12px;">Team Travel (Roster)</a></div></div>
+
+    <div class="em-header">June</div>
+    <div class="event-row" data-tags="camp"><div class="er-date">Jun 22–26, 2026</div><div class="er-main"><div class="er-name">NJSE Shooting Camp</div><div class="er-desc">Mechanics, shot quality, footwork, and decision shooting — built for translation. Five days of deliberate work. Location TBD.</div><div class="er-tags"><span class="er-tag camp">#Camps</span><span class="er-tag">Location TBD</span></div></div><div class="er-right"><div class="er-loc">TBD</div><a href="mailto:info@scholarselitegirls.com?subject=Shooting Camp Registration" class="btn-pur" style="padding:12px 24px;font-size:12px;">DM to Register</a></div></div>
+    <div class="event-row" data-tags="travel"><div class="er-date">Jun 26–28, 2026</div><div class="er-main"><div class="er-name">North Tartan Summer Jam</div><div class="er-desc">High-level competition. Mistakes get exposed — discipline gets rewarded. National travel to Minneapolis for one of the summer's premiere events.</div><div class="er-tags"><span class="er-tag">#TeamTravel</span><span class="er-tag">Minneapolis, MN</span></div></div><div class="er-right"><div class="er-loc">Minneapolis, MN</div><a href="mailto:info@scholarselitegirls.com?subject=North Tartan Summer Jam" class="btn-outline" style="padding:12px 24px;font-size:12px;">Team Travel (Roster)</a></div></div>
+
+    <div class="em-header">July</div>
+    <div class="event-row" data-tags="camp"><div class="er-date">Jul 6–9, 2026</div><div class="er-main"><div class="er-name">Position Camp</div><div class="er-desc">Guard/Wing/Big development with reads, pacing, and situational work. Position-specific coaching in a controlled development environment.</div><div class="er-tags"><span class="er-tag camp">#Camps</span><span class="er-tag">Location TBD</span></div></div><div class="er-right"><div class="er-loc">TBD</div><a href="mailto:info@scholarselitegirls.com?subject=Position Camp Registration" class="btn-pur" style="padding:12px 24px;font-size:12px;">DM to Register</a></div></div>
+    <div class="event-row" data-tags="travel showcase"><div class="er-date">Jul 10–13, 2026</div><div class="er-main"><div class="er-name">Run 4 The Roses</div><div class="er-desc">One of the biggest stages. We show up prepared, not hopeful. National recruiting showcase in Louisville — major program presence, college coaches on the sideline.</div><div class="er-tags"><span class="er-tag camp">#Showcase</span><span class="er-tag">#TeamTravel</span><span class="er-tag">Louisville, KY</span></div></div><div class="er-right"><div class="er-loc">Louisville, KY</div><a href="mailto:info@scholarselitegirls.com?subject=Run 4 The Roses" class="btn-outline" style="padding:12px 24px;font-size:12px;">Team Travel (Roster)</a></div></div>
+    <div class="event-row" data-tags="travel showcase"><div class="er-date">Jul 24–26, 2026</div><div class="er-main"><div class="er-name">The Finale</div><div class="er-desc">Finish the summer the right way — execution, toughness, and details. How your team ends the summer tells the story of how the season was built.</div><div class="er-tags"><span class="er-tag camp">#Showcase</span><span class="er-tag">#TeamTravel</span><span class="er-tag">Hamilton, OH</span></div></div><div class="er-right"><div class="er-loc">Hamilton, OH</div><a href="mailto:info@scholarselitegirls.com?subject=The Finale" class="btn-outline" style="padding:12px 24px;font-size:12px;">Team Travel (Roster)</a></div></div>
+
+    <div class="em-header" style="color:var(--white-dim);font-size:clamp(22px,3vw,36px);">Coming Soon — TBD</div>
+    <div class="event-row" data-tags="tbd"><div class="er-date">TBD</div><div class="er-main"><div class="er-name">I-95 Classic</div><div class="er-desc">Details coming soon. Follow @scholarselitegirls for release dates.</div><div class="er-tags"><span class="er-tag">#Showcase</span><span class="er-tag">TBD</span></div></div><div class="er-right"><div class="er-loc">TBD</div><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline" style="padding:12px 24px;font-size:12px;">Follow for Release</a></div></div>
+    <div class="event-row" data-tags="tbd"><div class="er-date">TBD</div><div class="er-main"><div class="er-name">Turnpike Challenge</div><div class="er-desc">Details coming soon.</div><div class="er-tags"><span class="er-tag">#Showcase</span><span class="er-tag">TBD</span></div></div><div class="er-right"><div class="er-loc">TBD</div><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline" style="padding:12px 24px;font-size:12px;">Follow for Release</a></div></div>
+    <div class="event-row" data-tags="tbd"><div class="er-date">TBD</div><div class="er-main"><div class="er-name">Catholic League Challenge</div><div class="er-desc">Details coming soon.</div><div class="er-tags"><span class="er-tag">#Showcase</span><span class="er-tag">TBD</span></div></div><div class="er-right"><div class="er-loc">TBD</div><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline" style="padding:12px 24px;font-size:12px;">Follow for Release</a></div></div>
+    <div class="event-row" data-tags="tbd"><div class="er-date">TBD</div><div class="er-main"><div class="er-name">Training Camp</div><div class="er-desc">Pre-season camp. Details TBD.</div><div class="er-tags"><span class="er-tag camp">#Camps</span><span class="er-tag">TBD</span></div></div><div class="er-right"><div class="er-loc">TBD</div><a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline" style="padding:12px 24px;font-size:12px;">Follow for Release</a></div></div>
+    <div class="event-row" data-tags="tbd"><div class="er-date">TBD</div><div class="er-main"><div class="er-name">Coaches Clinic</div><div class="er-desc">For coaches and program staff. Details TBD.</div><div class="er-tags"><span class="er-tag">#Clinics</span><span class="er-tag">TBD</span></div></div><div class="er-right"><div class="er-loc">TBD</div><a href="mailto:keil@westviewsports.com?subject=Coaches Clinic" class="btn-outline" style="padding:12px 24px;font-size:12px;">Email for Details</a></div></div>
+  </div>
+
+  <div class="events-reg-box">
+    <div class="erb-grid">
+      <div>
+        <div class="kicker">Registration</div>
+        <div class="erb-h">How to Register</div>
+        <p style="font-size:15px;color:var(--white-dim);line-height:1.85;margin-top:8px;">We don't run this like a hobby program. If you're serious about improvement, we'll get you the details quickly. Some events are team travel and roster-based. Camps and clinics are open registration depending on capacity.</p>
+        <div class="erb-steps">
+          <div class="erb-step"><div class="es-n">01</div><div><div class="es-t">DM @scholarselitegirls</div><div class="es-d">Send: Athlete Name · Grade · Position · Current Team/School · Events Interested In.</div></div></div>
+          <div class="erb-step"><div class="es-n">02</div><div><div class="es-t">Or Email Direct</div><div class="es-d"><a href="mailto:info@scholarselitegirls.com" style="color:var(--purple-lt)">info@scholarselitegirls.com</a> — include the same info. Response within 24–48 hours.</div></div></div>
+          <div class="erb-step"><div class="es-n">03</div><div><div class="es-t">We Confirm + Guide</div><div class="es-d">We'll confirm availability and recommend the best fit based on grade, position, and development goals.</div></div></div>
+        </div>
+      </div>
+      <div>
+        <div style="padding:40px;background:rgba(0,0,0,.25);border:1px solid rgba(244,242,248,.1);">
+          <div class="kicker">Quick Register</div>
+          <h3 style="font-family:'Oswald',sans-serif;font-size:28px;color:var(--white);margin-bottom:20px;">Ready to Train Like It Matters?</h3>
+          <p style="font-size:14px;color:var(--white-dim);line-height:1.75;margin-bottom:28px;">Real coaching. Real standards. Reps that translate. If that's what your athlete is looking for — you're in the right place.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <a href="mailto:info@scholarselitegirls.com?subject=Event Registration" class="btn-pur">Email for Details</a>
+            <a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline">DM on Instagram</a>
+          </div>
+        </div>
+        <div style="margin-top:4px;padding:28px;background:rgba(96,47,150,.1);border:1px solid rgba(96,47,150,.2);">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:10px;">FAQ</div>
+          <div style="font-size:13px;color:var(--white-dim);line-height:1.9;">
+            <p style="margin-bottom:8px;"><strong style="color:var(--white)">Do you guarantee exposure?</strong> No. We guarantee preparation. Exposure follows performance.</p>
+            <p style="margin-bottom:8px;"><strong style="color:var(--white)">Is every event open?</strong> No. Travel events are roster-based. Camps may be open.</p>
+            <p style="margin-bottom:8px;"><strong style="color:var(--white)">What grades?</strong> Primarily Grades 6–11.</p>
+            <p><strong style="color:var(--white)">Wrong fit?</strong> DM us with grade + position + goals and we'll find the right event.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     ABOUT PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-about">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">Who We Are</div>
+      <h1 class="page-h1">This Is Not<br>Recreational<br><em>Basketball.</em></h1>
+      <p class="page-sub">Development &gt; Exposure. Built on 25+ years of grassroots experience, Scholars Elite Academy was created to solve a credibility problem in girls basketball.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div class="about-body-grid">
+      <div class="rv">
+        <div class="kicker">The Problem We Solve</div>
+        <h2 class="sec-h" style="font-size:clamp(36px,4.5vw,60px);">Grassroots Girls Basketball<br>Has a Credibility Problem.</h2>
+        <p class="sec-p" style="max-width:100%;margin-bottom:20px;">Noise over development. Hype over preparation. Families get sold on exposure before athletes are ready. Rankings get promoted before habits are built. Programs collect fees and produce highlights — not prepared athletes.</p>
+        <p class="sec-p" style="max-width:100%;margin-bottom:20px;">We built Scholars Elite Academy to operate differently. Standards-based. Institutionally structured. Development-first — without apology.</p>
+        <div class="pillar-list rv">
+          <div class="pillar"><span class="pl-n">01</span><span class="pl-t">Accountability Over Entitlement</span><span class="pl-d">Non-negotiable.</span></div>
+          <div class="pillar"><span class="pl-n">02</span><span class="pl-t">Coachability Required</span><span class="pl-d">Apply feedback in real time.</span></div>
+          <div class="pillar"><span class="pl-n">03</span><span class="pl-t">Academic Responsibility</span><span class="pl-d">Classroom never optional.</span></div>
+          <div class="pillar"><span class="pl-n">04</span><span class="pl-t">No Guaranteed Minutes</span><span class="pl-d">Earned every session.</span></div>
+          <div class="pillar"><span class="pl-n">05</span><span class="pl-t">Family Partnership</span><span class="pl-d">Shared accountability.</span></div>
+          <div class="pillar"><span class="pl-n">06</span><span class="pl-t">Process Over Promises</span><span class="pl-d">Habits compound.</span></div>
+        </div>
+      </div>
+      <div class="rv">
+        <div class="about-quote-card">
+          <div class="aqc-q">"Elite programs don't just produce <em>highlights</em> —<br>they produce <em>habits.</em><br>And habits compound."</div>
+          <div class="aqc-stat"><div class="aqc-n">25<span style="font-size:.45em">+</span></div><div class="aqc-l">Years at the<br>grassroots level</div></div>
+        </div>
+        <div style="margin-top:4px;padding:32px;background:rgba(96,47,150,.1);border:1px solid rgba(96,47,150,.2);border-left:3px solid var(--purple);">
+          <p style="font-size:17px;font-style:italic;font-weight:300;color:var(--white-dim);line-height:1.65;">"We're not building exposure. We're building players. <strong style="color:var(--white);font-style:normal;">And players earn their own exposure.</strong>"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="founder-section">
+    <div class="kicker">Program Leadership</div>
+    <h2 class="sec-h rv" style="font-size:clamp(36px,4.5vw,60px);">Built by Operators.<br>Not Promoters.</h2>
+    <p style="font-size:15px;color:var(--white-dim);line-height:1.85;max-width:620px;margin-bottom:52px;" class="rv">Scholars Elite Academy is an independent program within the Westview Group ecosystem — with its own leadership, its own standards, and its own identity.</p>
+
+    <!-- Tier 1: Program Directors -->
+    <div class="kicker rv" style="margin-bottom:20px;">Program Directors</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:4px;" class="rv">
+
+      <div class="founder-card" style="display:flex;flex-direction:column;">
+        <div class="fc-badge" style="text-align:center;padding:28px;">
+          <div class="fc-initials">SR</div>
+          <div class="fc-role">Director<br>Scholars Elite Academy</div>
+        </div>
+        <div style="padding:36px;flex:1;">
+          <div class="fc-name">Sal Racobaldo</div>
+          <div class="fc-title">Director · Scholars Elite Academy</div>
+          <p class="fc-body">A New Jersey native with over a decade in the girls basketball community. Sal is the Head Coach of the Bishop Eustace girls basketball program and one of the most respected coaches in the state of New Jersey. As Director of Scholars Elite Academy, he oversees program operations, athlete development, and the day-to-day execution of the Scholars Elite standard. The program runs through him.</p>
+        </div>
+      </div>
+
+      <div class="founder-card" style="display:flex;flex-direction:column;border-color:var(--purple);">
+        <div class="fc-badge" style="text-align:center;padding:28px;background:var(--purple);">
+          <div class="fc-initials">KM</div>
+          <div class="fc-role" style="color:rgba(244,242,248,.75);">Director of Basketball Ops<br>Scholars Elite Academy<br><br>Managing Partner<br>The Westview Group</div>
+        </div>
+        <div style="padding:36px;flex:1;">
+          <div class="fc-name">Keil Moore</div>
+          <div class="fc-title">Director of Basketball Operations · Scholars Elite</div>
+          <p class="fc-body">A sports executive and program architect with 20 years in the grassroots basketball community. Keil serves as Director of Basketball Operations for Scholars Elite Academy — focused on creating a long-term basketball home for athletes serious about development, recruiting positioning, and personal growth. He is separately the Managing Partner of The Westview Group, which operates in NIL strategy, media, and athlete development infrastructure.</p>
+          <div class="fc-phil">"Elite programs don't just produce highlights — they produce habits. <strong>And habits compound.</strong>"</div>
+        </div>
+      </div>
+
+      <div class="founder-card" style="display:flex;flex-direction:column;">
+        <div class="fc-badge" style="text-align:center;padding:28px;">
+          <div class="fc-initials">BH</div>
+          <div class="fc-role">Middle School Director<br>Scholars Elite Academy</div>
+        </div>
+        <div style="padding:36px;flex:1;">
+          <div class="fc-name">Bernie Hynson</div>
+          <div class="fc-title">Middle School Director · Head Coach 8th Grade</div>
+          <p class="fc-body">A former collegiate point guard at Virginia Wesleyan — All-Conference Second Team, two-time Team Captain. Coach Hynson is a player-development-driven coach who brings a championship background and a long-term growth mindset to the middle school program. His primary focus is fundamentals, decision-making, defensive habits, and mental toughness — ensuring athletes are not just winning at a young age, but prepared to succeed at the high school and college levels.</p>
+          <div class="fc-phil">"Winning is a byproduct of development. <strong>Build the habits. The results follow.</strong>"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 2: Head Coaches -->
+    <div class="kicker rv" style="margin-bottom:20px;margin-top:52px;">Head Coaches</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px;" class="rv">
+
+      <div class="founder-card" style="display:flex;flex-direction:column;">
+        <div class="fc-badge" style="text-align:center;padding:24px;">
+          <div class="fc-initials" style="font-size:48px;">KS</div>
+          <div class="fc-role">Head Coach · 17U</div>
+        </div>
+        <div style="padding:32px;flex:1;">
+          <div class="fc-name">Kevin Slaughter</div>
+          <div class="fc-title">Head Coach · 17U · Audenreid HS (Philadelphia)</div>
+          <p class="fc-body">One of Philadelphia's most respected builders of culture in the Public League. Head Coach of the Audenreid Girls Basketball program, where he led the team to a Philadelphia Public League Championship. Known for defensive discipline, player development, and a calm sideline presence rooted in accountability and toughness. His teams play with structure, intensity, and purpose — and his players compete beyond high school while representing their community with pride.</p>
+          <div style="font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--purple-lt);margin-top:16px;">Development · Discipline · Championship Standards</div>
+        </div>
+      </div>
+
+      <div class="founder-card" style="display:flex;flex-direction:column;">
+        <div class="fc-badge" style="text-align:center;padding:24px;">
+          <div class="fc-initials" style="font-size:48px;">CD</div>
+          <div class="fc-role">Head Coach · 16U</div>
+        </div>
+        <div style="padding:32px;flex:1;">
+          <div class="fc-name">Chris Dawley</div>
+          <div class="fc-title">Head Coach · 16U</div>
+          <p class="fc-body">Bio coming soon.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tier 3: Development Staff -->
+    <div class="kicker rv" style="margin-bottom:20px;margin-top:52px;">Development Staff</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;" class="rv">
+
+      <div class="founder-card" style="display:flex;flex-direction:column;">
+        <div class="fc-badge" style="text-align:center;padding:24px;">
+          <div class="fc-initials" style="font-size:36px;">AJ<br>ME</div>
+          <div class="fc-role">Skills Development<br>Directors</div>
+        </div>
+        <div style="padding:32px;flex:1;">
+          <div class="fc-name">Aliyah Jeune &amp; Malik Ellison</div>
+          <div class="fc-title">Skills Development Directors</div>
+          <p class="fc-body">Oversee the individual development curriculum — ball-handling progression, footwork series, shooting mechanics, and positional reads. The engine of the day-to-day development program.</p>
+        </div>
+      </div>
+
+      <div class="founder-card" style="display:flex;flex-direction:column;">
+        <div class="fc-badge" style="text-align:center;padding:24px;">
+          <div class="fc-initials" style="font-size:48px;">IL</div>
+          <div class="fc-role">Assistant Coach<br>Player Dev. Coordinator</div>
+        </div>
+        <div style="padding:32px;flex:1;">
+          <div class="fc-name">Imani Lewis</div>
+          <div class="fc-title">Assistant Coach · Player Development Coordinator</div>
+          <p class="fc-body">Supports athletes with recruiting strategy, exposure planning, academic alignment, and long-term placement. Bridges the gap between development and opportunity for every Scholar in the program.</p>
+        </div>
+      </div>
+
+      <div style="background:rgba(96,47,150,.05);border:1px solid rgba(96,47,150,.15);padding:32px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+        <div style="font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--white-dim);margin-bottom:16px;">Staff · Growing</div>
+        <p style="font-size:13px;color:rgba(244,242,248,.3);line-height:1.8;">Additional coaching and development staff added as the program grows. Every hire reflects the Scholars Elite standard.</p>
+        <a href="mailto:info@scholarselitegirls.com?subject=Coaching Staff Inquiry" class="btn-outline" style="margin-top:24px;padding:10px 20px;font-size:11px;">Join the Staff →</a>
+      </div>
+    </div>
+
+    <!-- Westview separator -->
+    <div style="margin-top:52px;padding:36px;background:rgba(96,47,150,.08);border:1px solid rgba(96,47,150,.2);display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;" class="rv">
+      <div>
+        <div class="kicker" style="margin-bottom:10px;">The Westview Group · A Separate Entity</div>
+        <p style="font-size:14px;color:var(--white-dim);line-height:1.85;">Scholars Elite Academy is powered by — but distinct from — The Westview Group. TWG operates in NIL strategy, media, and the 4PN (For Players Network) platform. Two different organizations. Shared leadership, shared values, separate operations.</p>
+      </div>
+      <div style="flex-shrink:0;"><a href="mailto:keil@westviewsports.com?subject=Westview Group Inquiry" class="btn-outline" style="white-space:nowrap;">Contact TWG →</a></div>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--black);">
+    <div class="kicker rv">The Standard · Six Pillars</div>
+    <h2 class="sec-h rv">What We Demand.<br><span style="color:var(--purple-lt)">What You Earn.</span></h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:48px;border:1px solid rgba(96,47,150,.2);" class="rv">
+      <div style="padding:40px 34px;border-right:1px solid rgba(96,47,150,.15);border-bottom:1px solid rgba(96,47,150,.15);position:relative;overflow:hidden;transition:background .3s;" onmouseenter="this.style.background='rgba(96,47,150,.08)'" onmouseleave="this.style.background=''"><div style="font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:12px;">Academic</div><div style="font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;color:var(--white);margin-bottom:10px;">Academic Integrity</div><div style="font-size:13px;color:var(--white-dim);line-height:1.75;">Minimum GPA standards. Regular check-ins. The court never replaces the classroom.</div></div>
+      <div style="padding:40px 34px;border-right:1px solid rgba(96,47,150,.15);border-bottom:1px solid rgba(96,47,150,.15);transition:background .3s;" onmouseenter="this.style.background='rgba(96,47,150,.08)'" onmouseleave="this.style.background=''"><div style="font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:12px;">Compete</div><div style="font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;color:var(--white);margin-bottom:10px;">Competitive Edge</div><div style="font-size:13px;color:var(--white-dim);line-height:1.75;">Every session has a measurable objective. Effort is non-negotiable. Talent is developed.</div></div>
+      <div style="padding:40px 34px;border-bottom:1px solid rgba(96,47,150,.15);transition:background .3s;" onmouseenter="this.style.background='rgba(96,47,150,.08)'" onmouseleave="this.style.background=''"><div style="font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:12px;">Character</div><div style="font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;color:var(--white);margin-bottom:10px;">Character Development</div><div style="font-size:13px;color:var(--white-dim);line-height:1.75;">Coachability, leadership, accountability — graded as seriously as ball-handling.</div></div>
+      <div style="padding:40px 34px;border-right:1px solid rgba(96,47,150,.15);transition:background .3s;" onmouseenter="this.style.background='rgba(96,47,150,.08)'" onmouseleave="this.style.background=''"><div style="font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:12px;">Recruit</div><div style="font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;color:var(--white);margin-bottom:10px;">Recruitment Ready</div><div style="font-size:13px;color:var(--white-dim);line-height:1.75;">Prepared on film, in person, and on paper. Preparation meets opportunity here.</div></div>
+      <div style="padding:40px 34px;border-right:1px solid rgba(96,47,150,.15);transition:background .3s;" onmouseenter="this.style.background='rgba(96,47,150,.08)'" onmouseleave="this.style.background=''"><div style="font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:12px;">NIL</div><div style="font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;color:var(--white);margin-bottom:10px;">NIL Awareness</div><div style="font-size:13px;color:var(--white-dim);line-height:1.75;">Early education on personal brand and NIL opportunity. We build business-minded athletes.</div></div>
+      <div style="padding:40px 34px;transition:background .3s;" onmouseenter="this.style.background='rgba(96,47,150,.08)'" onmouseleave="this.style.background=''"><div style="font-family:'Courier Prime',monospace;font-size:9.5px;letter-spacing:3px;text-transform:uppercase;color:var(--purple-lt);margin-bottom:12px;">Family</div><div style="font-family:'Oswald',sans-serif;font-size:24px;font-weight:600;color:var(--white);margin-bottom:10px;">Family Partnership</div><div style="font-size:13px;color:var(--white-dim);line-height:1.75;">No guaranteed minutes. Parents are partners. Shared accountability across the household.</div></div>
+    </div>
+    <div style="margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;" class="rv">
+      <a onclick="navigate('tryouts')" class="btn-pur" href="#">2026 Tryouts</a>
+      <a onclick="navigate('development')" class="btn-outline" href="#">Player Development System</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     DEVELOPMENT PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-development">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">Player Development System</div>
+      <h1 class="page-h1">The System<br>Behind<br><em>The Player.</em></h1>
+      <p class="page-sub">Our system is built to produce athletes who are prepared — not just promoted. Every phase has a curriculum. Every athlete has a plan.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div class="dev-grid">
+      <div class="dev-tabs rv" id="devTabs">
+        <div class="dev-tab on" onclick="setPhase(0)"><span class="dt-n">01</span><span class="dt-lbl">Skill Development</span><span class="dt-arrow">→</span></div>
+        <div class="dev-tab" onclick="setPhase(1)"><span class="dt-n">02</span><span class="dt-lbl">Basketball Intelligence</span><span class="dt-arrow">→</span></div>
+        <div class="dev-tab" onclick="setPhase(2)"><span class="dt-n">03</span><span class="dt-lbl">Physical Preparation</span><span class="dt-arrow">→</span></div>
+        <div class="dev-tab" onclick="setPhase(3)"><span class="dt-n">04</span><span class="dt-lbl">Mental Performance</span><span class="dt-arrow">→</span></div>
+        <div class="dev-tab" onclick="setPhase(4)"><span class="dt-n">05</span><span class="dt-lbl">Recruiting Strategy</span><span class="dt-arrow">→</span></div>
+        <div class="dev-tab" onclick="setPhase(5)"><span class="dt-n">06</span><span class="dt-lbl">NIL Education</span><span class="dt-arrow">→</span></div>
+      </div>
+      <div class="dev-panel rv" id="devPanel">
+        <div class="dp-h">Skill Development</div>
+        <div class="dp-b">Position-specific fundamentals with emphasis on translatable, game-speed execution. Every session is filmed. Every player gets individual feedback. Individual development plans crafted at start of season, updated monthly.</div>
+        <div class="dp-tags"><span class="dp-tag">Ball Control Progression</span><span class="dp-tag">Shot Mechanics</span><span class="dp-tag">Decision Shooting</span><span class="dp-tag">Footwork Series</span><span class="dp-tag">Finishing Packages</span><span class="dp-tag">Positional Reads</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     RECRUITING PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-recruiting">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">Recruiting Pipeline</div>
+      <h1 class="page-h1">We Build<br>Recruited<br><em>Athletes.</em></h1>
+      <p class="page-sub">Exposure without preparation is wasted opportunity. Our pipeline runs on strategy — not luck, not hype.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div class="rec-intro rv">
+      <div>
+        <div class="kicker">The Process</div>
+        <h2 class="sec-h" style="font-size:clamp(32px,4vw,52px);">Evaluation → Development → Film → Events → Communication.</h2>
+        <p class="sec-p" style="max-width:100%;margin-top:16px;">This is how we build recruiting pipelines. Not by broadcasting, but by preparing. College coaches recruit prepared athletes. Our job is to make sure every Scholar arrives prepared — on the floor, on film, and on paper.</p>
+        <div style="margin-top:32px;padding:28px;background:rgba(96,47,150,.1);border-left:2px solid var(--purple);">
+          <p style="font-size:16px;font-style:italic;color:var(--white-dim);line-height:1.65;">"Do you guarantee exposure? <strong style="color:var(--white);font-style:normal;">No. We guarantee preparation. Exposure follows performance.</strong>"</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--purple-dk);padding:44px;border:1px solid rgba(96,47,150,.4);">
+          <div class="kicker">What We Don't Do</div>
+          <div style="font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:1.5px;line-height:2.2;color:rgba(244,242,248,.45);">✗ Guarantee scholarships or offers<br>✗ Guarantee exposure<br>✗ Guarantee playing time<br>✗ Prioritize rankings over development<br>✗ Run hype campaigns over honest eval</div>
+          <div style="margin-top:24px;border-top:1px solid rgba(96,47,150,.3);padding-top:24px;">
+            <div class="kicker">What We Do</div>
+            <div style="font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:1.5px;line-height:2.2;color:rgba(244,242,248,.65);">✓ Build prepared athletes<br>✓ Develop real film packages<br>✓ Coach communication strategy<br>✓ Strategic event selection<br>✓ Academic + character alignment</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rec-cards rv">
+      <div class="rec-card"><div class="rc-n">01</div><div class="rc-t">Film & Highlights</div><div class="rc-b">Professional quality game film and curated highlight packages built to meet college coaching staff evaluation standards. Not just clips — context.</div></div>
+      <div class="rec-card"><div class="rc-n">02</div><div class="rc-t">Player Profiles</div><div class="rc-b">Comprehensive athlete profiles with stats, academics, positional analysis, and recruiting contact information — clean, credible, college-ready.</div></div>
+      <div class="rec-card"><div class="rc-n">03</div><div class="rc-t">Strategic Exposure</div><div class="rc-b">Tournament selection is deliberate. The right events for the right athlete at the right time. Not every event. The events that move the needle.</div></div>
+      <div class="rec-card"><div class="rc-n">04</div><div class="rc-t">Direct Communication</div><div class="rc-b">Coach communication protocol, NCAA compliance guidance, visit strategy, and offer evaluation backed by direct program relationships.</div></div>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--black);">
+    <div class="kicker rv">FAQ · Recruiting</div>
+    <div class="rec-faq">
+      <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Do you guarantee scholarships or offers?<span class="faq-tog">+</span></button><div class="faq-a">No. We guarantee preparation. What we do guarantee: every athlete will have professional film, a compelling player profile, a coach communication strategy, and event placement designed for their position and grade level. The rest is earned on the floor.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">When does the recruiting process start?<span class="faq-tog">+</span></button><div class="faq-a">Recruiting roadmaps begin at the 15U level. That doesn't mean younger athletes aren't being developed with recruiting in mind — it means the formal outreach, film packages, and coach communication begin at 15U when it's NCAA-compliant to do so.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">What events do you attend for recruiting visibility?<span class="faq-tog">+</span></button><div class="faq-a">Event selection is strategic and athlete-specific. We don't just attend every tournament. We evaluate what events the right coaches will be at for each athlete's position, division target, and development readiness.</div></div>
+      <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">How do you handle NCAA recruiting compliance?<span class="faq-tog">+</span></button><div class="faq-a">We educate every family on the NCAA recruiting calendar, dead periods, contact rules, and evaluation windows. All communication is conducted within compliance guidelines.</div></div>
+    </div>
+    <div style="margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;" class="rv">
+      <a href="mailto:info@scholarselitegirls.com?subject=Recruiting Information" class="btn-pur">Get Recruiting Info</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     NIL PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-nil">
+  <div class="nil-page-header">
+    <div class="nil-wm">NIL</div>
+    <div style="position:relative;z-index:1;">
+      <div class="kicker">NIL Education</div>
+      <h1 class="page-h1">Know Your<br>Value. <em>Now.</em></h1>
+      <p class="page-sub" style="color:rgba(244,242,248,.65);">The NIL landscape rewards the prepared. Every Scholar gets foundational knowledge to protect and monetize their brand before they ever sign a deal.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div class="kicker rv">Why NIL Education Starts Here</div>
+    <h2 class="sec-h rv" style="font-size:clamp(32px,4vw,52px);">Most Athletes Learn NIL<br>After It's Already Cost Them.</h2>
+    <p class="sec-p rv" style="max-width:700px;margin-bottom:60px;">Uninformed deals, compliance violations, brand missteps — they happen to athletes who weren't educated early. We integrate NIL curriculum into the program from day one so every Scholar arrives at college knowing exactly what they own, what it's worth, and how to protect it.</p>
+    <div class="nil-three rv">
+      <div class="nil-card"><div class="nil-icon">I</div><div class="nil-t">NIL Curriculum</div><div class="nil-b">Deal structures, brand agreements, disclosure requirements, and NCAA compliance boundaries — covered from day one. No surprises when the offers come.</div></div>
+      <div class="nil-card"><div class="nil-icon">II</div><div class="nil-t">Personal Brand Building</div><div class="nil-b">Social presence, content strategy, and media identity development tailored to each athlete's unique story. Your brand is built on who you actually are.</div></div>
+      <div class="nil-card"><div class="nil-icon">III</div><div class="nil-t">NIL Deal Desk Access</div><div class="nil-b">Westview Group's NIL Deal Desk connects eligible athletes to vetted brand opportunities — evaluated for fit, compliance, and fair market value. Institutional-grade deal support.</div></div>
+    </div>
+    <div style="margin-top:4px;" class="rv">
+      <div style="background:var(--purple-dk);padding:44px;border:1px solid rgba(96,47,150,.3);display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;">
+        <div>
+          <div class="kicker">Westview NIL Deal Desk</div>
+          <h3 style="font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:var(--white);margin-bottom:16px;">Institutional-Grade NIL Strategy.</h3>
+          <p style="font-size:14px;color:var(--white-dim);line-height:1.85;">The Westview Group's NIL Deal Desk operates across the grassroots ecosystem. Scholars Elite athletes receive priority access for deal sourcing, evaluation, compliance review, and negotiation support — executed, not just explained.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <a href="mailto:keil@westviewsports.com?subject=NIL Deal Desk Inquiry" class="btn-pur">Contact NIL Deal Desk</a>
+          <a href="mailto:info@scholarselitegirls.com?subject=NIL Education" class="btn-outline">NIL Education Info</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PLACEMENTS PAGE
+══════════════════════════════════ -->
+<!-- ══════════════════════════════════
+     PARENTS PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-parents">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">Parents</div>
+      <h1 class="page-h1">Your Partner<br>In <em>This.</em></h1>
+      <p class="page-sub">Transparent communication, clear expectations, and genuine partnership with every family in the program. No politics. No surprises.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div class="parents-grid">
+      <div>
+        <div class="kicker rv">FAQ</div>
+        <h2 class="sec-h rv" style="font-size:clamp(32px,4vw,52px);">Your Questions, Answered Honestly.</h2>
+        <div class="faq rv">
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Do you guarantee a team spot?<span class="faq-tog">+</span></button><div class="faq-a">No. We guarantee an honest evaluation. Every athlete is assessed on merit — basketball IQ, coachability, competitiveness, and character. A spot is earned, not purchased.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Do you guarantee playing time?<span class="faq-tog">+</span></button><div class="faq-a">No. Minutes are earned. This is non-negotiable. Athletes earn court time through performance, preparation, and standards — not seniority or tuition.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">What are the academic requirements?<span class="faq-tog">+</span></button><div class="faq-a">All Scholars maintain a minimum 2.5 GPA. We conduct regular academic check-ins. Academic standing is a condition of continued participation. The court never replaces the classroom.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">What is the season commitment?<span class="faq-tog">+</span></button><div class="faq-a">Spring through summer, with optional fall development. Full commitment during the season — tournaments, practices, team events. Schedule is communicated well in advance. Families must align with the commitment before registering.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">What do program fees cover?<span class="faq-tog">+</span></button><div class="faq-a">Coaching staff, facility access, tournament entry, uniforms, film production, player profiles, and NIL education. All costs disclosed upfront. No surprise fees — ever.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">Is this a fit for every athlete?<span class="faq-tog">+</span></button><div class="faq-a">No. It's built for athletes who want honest feedback and real coaching. If your athlete wants guaranteed minutes or a protected role, this isn't the right program. If they want to be pushed and prepared — we want them.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">What's required from families?<span class="faq-tog">+</span></button><div class="faq-a">Communication, accountability, and alignment with the program's standards. Parents are partners, not spectators. We hold families to the same standard of investment that we hold athletes to.</div></div>
+          <div class="faq-item"><button class="faq-q" onclick="faqToggle(this)">How do you communicate with parents?<span class="faq-tog">+</span></button><div class="faq-a">Scheduled monthly updates, open email line, and direct access to the coaching staff. One-week response SLA on all family inquiries. We don't disappear after you pay.</div></div>
+        </div>
+      </div>
+      <div class="rv">
+        <div class="contact-box">
+          <div class="cb-h">Get in Touch.</div>
+          <div class="cb-s">Response within 24–48 hours</div>
+          <div class="cb-row"><span>📧</span><span class="cb-txt">info@scholarselitegirls.com</span></div>
+          <div class="cb-row"><span>📱</span><span class="cb-txt">@scholarselitegirls</span></div>
+          <div class="cb-row"><span>📍</span><span class="cb-txt">New Jersey · Tri-State Area</span></div>
+          <div class="cb-row"><span>🏢</span><span class="cb-txt">Powered by The Westview Group</span></div>
+          <div class="cb-btns">
+            <a href="mailto:info@scholarselitegirls.com?subject=Book a Call - Scholars Elite" class="btn-wh">Book a Call</a>
+            <a href="mailto:info@scholarselitegirls.com" class="btn-outline-sm">Send Email</a>
+            <a href="https://instagram.com/scholarselitegirls" target="_blank" class="btn-outline-sm">DM on Instagram</a>
+          </div>
+        </div>
+        <div style="margin-top:4px;background:rgba(96,47,150,.1);border:1px solid rgba(96,47,150,.2);padding:36px;">
+          <div class="kicker">What We Expect From Families</div>
+          <div style="font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:1.5px;line-height:2.4;color:rgba(244,242,248,.55);">
+            ✓ Communicate conflicts in advance<br>
+            ✓ Respect the coaching staff's decisions<br>
+            ✓ Hold your athlete to the same standard<br>
+            ✓ Align on academic monitoring<br>
+            ✓ Trust the process — not just the results
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SPONSORS PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-sponsors">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">Partner With Us</div>
+      <h1 class="page-h1">We're Building<br>The Infrastructure<br><em>Women's Basketball Deserves.</em></h1>
+      <p class="page-sub">Aligned brands gain meaningful visibility inside an influential sports community — while funding real development. Systems, not vibes.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div class="sponsors-grid">
+      <div>
+        <div class="kicker rv">Sponsorship Tiers</div>
+        <h2 class="sec-h rv" style="font-size:clamp(32px,4vw,52px);">What Support Funds.</h2>
+        <p class="sec-p rv" style="max-width:100%;margin-bottom:36px;">Development infrastructure, access and opportunity, program standards. Every dollar goes toward building the system that produces prepared athletes.</p>
+        <div class="tier-list rv">
+          <div class="tier"><div class="tier-label">Operator Partner</div><div class="tier-price">$25,000+</div><a href="mailto:keil@westviewsports.com?subject=Operator Partner Sponsorship" class="tier-cta-link">Inquire →</a></div>
+          <div class="tier"><div class="tier-label">Program Sponsor</div><div class="tier-price">$10,000</div><a href="mailto:keil@westviewsports.com?subject=Program Sponsor" class="tier-cta-link">Inquire →</a></div>
+          <div class="tier"><div class="tier-label">Team Sponsor</div><div class="tier-price">$5,000</div><a href="mailto:keil@westviewsports.com?subject=Team Sponsor" class="tier-cta-link">Inquire →</a></div>
+          <div class="tier"><div class="tier-label">Community Sponsor</div><div class="tier-price">$2,500</div><a href="mailto:keil@westviewsports.com?subject=Community Sponsor" class="tier-cta-link">Inquire →</a></div>
+          <div class="tier"><div class="tier-label">Supporter</div><div class="tier-price">$1,000</div><a href="mailto:keil@westviewsports.com?subject=Supporter" class="tier-cta-link">Inquire →</a></div>
+        </div>
+        <div class="compliance rv">NO RECRUITING PROMISES OR NIL GUARANTEES. SPONSORSHIPS INCLUDE DEFINED DELIVERABLES. NCAA / STATE / INSTITUTION COMPLIANCE MAINTAINED.</div>
+      </div>
+      <div class="rv">
+        <div class="kicker">Sponsor Benefits</div>
+        <div class="sponsor-perks">
+          <div class="perk-section"><div class="perk-title">Brand Visibility</div><div class="perk-item">Logo placement on jerseys and warm-ups</div><div class="perk-item">Website sponsor section + backlink</div><div class="perk-item">Featured social recognition monthly</div><div class="perk-item">Event signage and banners</div></div>
+          <div class="perk-section"><div class="perk-title">Event Exposure</div><div class="perk-item">Naming rights for flagship events</div><div class="perk-item">Hospitality access at marquee events</div><div class="perk-item">On-site activation opportunities</div></div>
+          <div class="perk-section"><div class="perk-title">Digital + Media</div><div class="perk-item">Inclusion in highlight videos when produced</div><div class="perk-item">Featured in recruiting showcases</div><div class="perk-item">Brand mentions in email marketing</div></div>
+        </div>
+        <a href="mailto:keil@westviewsports.com?subject=Sponsorship Packet Request" class="btn-pur" style="margin-top:28px;display:inline-block;">Request Sponsor Packet →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TRYOUTS PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-tryouts">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">2026 Tryouts</div>
+      <h1 class="page-h1">Middle School<br>& Invite-Only<br><em>High School.</em></h1>
+      <p class="page-sub">Open middle school tryouts. High school by invitation only. Registration required. Serious athletes only.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;">
+    <div>
+      <div class="kicker rv">Session Breakdown</div>
+
+      <!-- Middle School Sheet -->
+      <div class="tryout-sheet rv">
+        <div class="ts-hdr"><span class="ts-title">Middle School · Grades 6–8</span><span class="ts-status">Open Registration</span></div>
+        <div class="ts-row"><span class="ts-k">Date</span><span class="ts-v pur">March 7, 2026</span></div>
+        <div class="ts-row"><span class="ts-k">Time</span><span class="ts-v">1:00 PM</span></div>
+        <div class="ts-row"><span class="ts-k">Location</span><span class="ts-v">Bishop Eustace HS · NJ</span></div>
+        <div class="ts-row"><span class="ts-k">Grades</span><span class="ts-v">6 · 7 · 8</span></div>
+        <div class="ts-row"><span class="ts-k">Status</span><span class="ts-v pur">Open · Limited Spots</span></div>
+        <div class="ts-btn"><a href="mailto:info@scholarselitegirls.com?subject=Middle School Tryout Registration - March 7" class="btn-pur" style="display:block;text-align:center;width:100%;">Register — Middle School →</a></div>
+      </div>
+
+      <!-- High School Sheet -->
+      <div class="tryout-sheet rv" style="margin-top:4px;">
+        <div class="ts-hdr" style="background:var(--purple-dk);"><span class="ts-title">High School · Grades 9–11</span><span class="ts-status">Invite Only</span></div>
+        <div class="ts-row"><span class="ts-k">Date</span><span class="ts-v pur">March 7, 2026</span></div>
+        <div class="ts-row"><span class="ts-k">Time</span><span class="ts-v">3:00 PM</span></div>
+        <div class="ts-row"><span class="ts-k">Location</span><span class="ts-v">Bishop Eustace HS · NJ</span></div>
+        <div class="ts-row"><span class="ts-k">Grades</span><span class="ts-v">9 · 10 · 11</span></div>
+        <div class="ts-row"><span class="ts-k">Status</span><span class="ts-v" style="color:rgba(244,242,248,.45);">Invite Only</span></div>
+        <div class="ts-btn"><a href="mailto:info@scholarselitegirls.com?subject=HS Tryout Evaluation Request" class="btn-outline" style="display:block;text-align:center;width:100%;">Request Evaluation →</a></div>
+      </div>
+
+      <div style="margin-top:4px;padding:28px;background:rgba(96,47,150,.1);border:1px solid rgba(96,47,150,.2);" class="rv">
+        <div class="chk-title">What To Bring</div>
+        <div class="chk">Basketball · Water · Proper training attire</div>
+        <div class="chk">Competitive mindset — everything else follows</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="kicker rv">The Scorecard</div>
+      <h2 class="sec-h rv" style="font-size:clamp(28px,3.5vw,48px);">What We Evaluate.</h2>
+      <div class="rv" style="margin-top:16px;">
+        <div class="chk-title">Evaluation Criteria</div>
+        <div class="chk">Decision-making: reads, spacing, poise under pressure</div>
+        <div class="chk">Skill foundation: handle, finishing, shot base</div>
+        <div class="chk">Competitiveness: effort + response to adversity</div>
+        <div class="chk">Coachability: apply feedback in real time</div>
+        <div class="chk">Defense: stance, angles, communication</div>
+        <div class="chk">Character and team-first mentality</div>
+        <div class="chk">Academic standing — verified post-selection</div>
+      </div>
+      <div class="try-note rv">
+        <p>"We're building a program — not filling a roster. <strong>Every spot is earned.</strong> Every rep has a purpose."</p>
+      </div>
+      <div style="margin-top:28px;background:var(--purple-dk);padding:36px;border:1px solid rgba(96,47,150,.3);" class="rv">
+        <div class="kicker">FAQ · Tryouts</div>
+        <div style="font-size:13.5px;color:var(--white-dim);line-height:2.2;">
+          <p><strong style="color:var(--white)">Guarantee a spot?</strong> No. Honest evaluation only.</p>
+          <p><strong style="color:var(--white)">Guarantee minutes?</strong> No. Minutes are earned.</p>
+          <p><strong style="color:var(--white)">Why invite-only HS?</strong> High school spots are highly competitive. If you haven't received an invite, request an evaluation via email.</p>
+          <p><strong style="color:var(--white)">Missed tryouts?</strong> DM or email to request a separate evaluation window.</p>
+        </div>
+        <div style="margin-top:20px;">
+          <a href="mailto:info@scholarselitegirls.com?subject=Evaluation Request" class="btn-outline" style="padding:12px 24px;font-size:12px;display:inline-block;">Request Evaluation</a>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     GOLF PAGE
+══════════════════════════════════ -->
+<div class="page" id="page-golf">
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="kicker">Final Four Weekend · Fundraiser</div>
+      <h1 class="page-h1">Celebrity Golf<br><em>Invitational.</em></h1>
+      <p class="page-sub">Athletes, executives, and sports business leaders — one day, one mission. Support women's basketball development in New Jersey.</p>
+    </div>
+  </div>
+  <div class="sec-pad" style="background:var(--navy-dk);">
+    <div class="golf-grid rv">
+      <div>
+        <div class="golf-poster">
+          <div class="gp-kicker">Scholars Elite Academy · Fundraiser</div>
+          <div class="gp-title">Celebrity<br>Golf Invitational</div>
+          <div class="gp-date">📅 April 3, 2026<br>📍 Ramblewood Country Club · Marlton, NJ</div>
+          <a href="mailto:keil@westviewsports.com?subject=Golf Tournament Sponsorship" class="gp-btn">Become a Sponsor →</a>
+          <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="mailto:keil@westviewsports.com?subject=Golf Tournament Registration" class="btn-outline">Register to Attend</a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="kicker">About the Event</div>
+        <h2 style="font-family:'Oswald',sans-serif;font-size:clamp(28px,3.5vw,44px);font-weight:700;color:var(--white);margin-bottom:20px;">Support the Mission.</h2>
+        <p style="font-size:15px;color:var(--white-dim);line-height:1.85;margin-bottom:28px;">A day of golf, networking, and culture — bringing together athletes, executives, and sports business leaders to support girls basketball development in New Jersey. All proceeds fund Scholars Elite Academy scholarships and program operations.</p>
+        <div class="gp-perks">
+          <div class="gp-perk">One-day event at Ramblewood Country Club, Marlton NJ</div>
+          <div class="gp-perk">Celebrity athletes and sports industry figures</div>
+          <div class="gp-perk">Networking across the Westview ecosystem</div>
+          <div class="gp-perk">VIP reception and awards ceremony</div>
+          <div class="gp-perk">Corporate and brand sponsorship packages available</div>
+          <div class="gp-perk">All proceeds fund NJSE scholarship and operations</div>
+        </div>
+        <div style="margin-top:40px;background:rgba(96,47,150,.1);border:1px solid rgba(96,47,150,.2);padding:32px;">
+          <div class="kicker">Sponsorship + Tickets</div>
+          <p style="font-size:14px;color:var(--white-dim);line-height:1.8;margin-bottom:20px;">For sponsorship packages, table reservations, and foursome pricing — contact us directly. All inquiries handled by The Westview Group.</p>
+          <a href="mailto:keil@westviewsports.com?subject=Golf Tournament - Sponsor or Attend" class="btn-pur">Contact for Details →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     WEBGL SHADERS + SCRIPTS
+═══════════════════════════════════════════ -->
+<script>
+/* ══════════════════════════════════════════════
+   WEBGL BASKETBALL COURT DITHER HERO
+══════════════════════════════════════════════ */
+const VERT=`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}`;
+const FRAG=`
+precision highp float;
+uniform float uTime;uniform vec2 uResolution;uniform vec2 uMouse;uniform float uScroll;
+varying vec2 vUv;
+vec2 hash2(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.0+2.0*fract(sin(p)*43758.5453);}
+float gnoise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*f*(f*(f*6.0-15.0)+10.0);float a=dot(hash2(i+vec2(0,0)),f-vec2(0,0)),b=dot(hash2(i+vec2(1,0)),f-vec2(1,0)),c=dot(hash2(i+vec2(0,1)),f-vec2(0,1)),d=dot(hash2(i+vec2(1,1)),f-vec2(1,1));return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}
+float fbm(vec2 p){float v=0.0,a=0.5;mat2 r=mat2(0.8,-0.6,0.6,0.8);for(int i=0;i<5;i++){v+=gnoise(p)*a;p=r*p*2.1;a*=0.5;}return v;}
+float bayer8(vec2 pos){int x=int(mod(pos.x,8.0)),y=int(mod(pos.y,8.0));
+if(y==0){if(x==0)return 0.;if(x==1)return 32.;if(x==2)return 8.;if(x==3)return 40.;if(x==4)return 2.;if(x==5)return 34.;if(x==6)return 10.;return 42.;}
+if(y==1){if(x==0)return 48.;if(x==1)return 16.;if(x==2)return 56.;if(x==3)return 24.;if(x==4)return 50.;if(x==5)return 18.;if(x==6)return 58.;return 26.;}
+if(y==2){if(x==0)return 12.;if(x==1)return 44.;if(x==2)return 4.;if(x==3)return 36.;if(x==4)return 14.;if(x==5)return 46.;if(x==6)return 6.;return 38.;}
+if(y==3){if(x==0)return 60.;if(x==1)return 28.;if(x==2)return 52.;if(x==3)return 20.;if(x==4)return 62.;if(x==5)return 30.;if(x==6)return 54.;return 22.;}
+if(y==4){if(x==0)return 3.;if(x==1)return 35.;if(x==2)return 11.;if(x==3)return 43.;if(x==4)return 1.;if(x==5)return 33.;if(x==6)return 9.;return 41.;}
+if(y==5){if(x==0)return 51.;if(x==1)return 19.;if(x==2)return 59.;if(x==3)return 27.;if(x==4)return 49.;if(x==5)return 17.;if(x==6)return 57.;return 25.;}
+if(y==6){if(x==0)return 15.;if(x==1)return 47.;if(x==2)return 7.;if(x==3)return 39.;if(x==4)return 13.;if(x==5)return 45.;if(x==6)return 5.;return 37.;}
+if(x==0)return 63.;if(x==1)return 31.;if(x==2)return 55.;if(x==3)return 23.;if(x==4)return 61.;if(x==5)return 29.;if(x==6)return 53.;return 21.;}
+const vec3 C0=vec3(0.024,0.031,0.059),C1=vec3(0.051,0.106,0.243),C2=vec3(0.376,0.184,0.588),C3=vec3(0.757,0.498,0.231),C4=vec3(0.957,0.949,0.973);
+vec3 pal(int i){if(i==0)return C0;if(i==1)return C1;if(i==2)return C2;if(i==3)return C3;return C4;}
+void main(){
+  vec2 uv=vUv;float asp=uResolution.x/uResolution.y;
+  vec2 cv=vec2(uv.x*asp,uv.y),cc=vec2(asp*.5,.5),cp=cv-cc;
+  float t=uTime*.04+uScroll*.00022;
+  float warp=fbm(cv*vec2(1.0,8.0)+vec2(t*.3,0.)),grain=gnoise(cv*vec2(1.2,60.)+warp*.18);
+  grain=grain*.5+.5;
+  float courtV=.38+grain*.25;
+  float lw=.004;
+  float midLine=step(abs(cp.x)-lw,0.0);
+  float cCirc=step(abs(length(cp)-.115),lw);float cDot=step(length(cp)-.018,0.);
+  vec2 lpL=cp-vec2(-asp*.37,0.),lpR=cp-vec2(asp*.37,0.);
+  float tpL=step(abs(length(lpL)-.24),lw*1.4),tpR=step(abs(length(lpR)-.24),lw*1.4);
+  vec2 pkL=cp+vec2(asp*.3,0.),pkR=cp-vec2(asp*.3,0.);
+  vec2 pb=vec2(.14,.12);vec2 dL=abs(pkL)-pb,dR=abs(pkR)-pb;
+  float paintL=step(abs(length(max(dL,0.))+min(max(dL.x,dL.y),0.)),lw);
+  float paintR=step(abs(length(max(dR,0.))+min(max(dR.x,dR.y),0.)),lw);
+  float ftL=step(abs(length(cp+vec2(asp*.28,0.))-.08),lw),ftR=step(abs(length(cp-vec2(asp*.28,0.))-.08),lw);
+  vec2 bnd=cp;vec2 bd=abs(bnd)-vec2(asp*.47,.45);
+  float boundary=step(abs(length(max(bd,0.))+min(max(bd.x,bd.y),0.)),lw*1.5);
+  float lines=clamp(midLine+cCirc+cDot+tpL+tpR+paintL+paintR+ftL+ftR+boundary,0.,1.);
+  courtV=mix(courtV,.82,lines*.9);
+  vec2 mUV=uMouse/uResolution;mUV.y=1.-mUV.y;
+  float md=length(uv-mUV),bloom=.52*exp(-md*4.5);
+  float field=courtV-.08+bloom;
+  vec2 vig=uv*2.-1.;field*=1.-dot(vig,vig)*.3;
+  field+=.02*sin(uTime*.7+uv.x*3.14);
+  field=clamp(field,0.,.9999);
+  float ds=6.;vec2 dpos=floor(uv*uResolution/ds);
+  float thresh=bayer8(dpos)/64.;float dithered=field+(thresh-.5)*.42;
+  dithered=clamp(dithered,0.,.9999);
+  int ci=int(dithered*5.);vec3 col=pal(ci);
+  float scanY=fract(uTime*.111),scan=smoothstep(.012,0.,abs(uv.y-scanY));
+  col=mix(col,C2,scan*.9);
+  gl_FragColor=vec4(col,1.);
+}`;
+
+(function initGL(){
+  const canvas=document.getElementById('hero-canvas');
+  const heroEl=document.getElementById('hero');
+  let renderer,uniforms;
+  try{renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false});renderer.setPixelRatio(1.0);}
+  catch(e){console.warn('WebGL unavailable');return;}
+  const scene=new THREE.Scene(),camera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  uniforms={uTime:{value:0},uResolution:{value:new THREE.Vector2(1,1)},uMouse:{value:new THREE.Vector2(0,0)},uScroll:{value:0}};
+  const mat=new THREE.ShaderMaterial({vertexShader:VERT,fragmentShader:FRAG,uniforms});
+  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),mat));
+  function resize(){const W=heroEl.clientWidth,H=heroEl.clientHeight;renderer.setSize(W,H,false);uniforms.uResolution.value.set(W,H);}
+  window.addEventListener('resize',resize);new ResizeObserver(resize).observe(heroEl);resize();
+  document.addEventListener('mousemove',e=>{uniforms.uMouse.value.set(e.clientX,window.innerHeight-e.clientY);});
+  window.addEventListener('scroll',()=>{uniforms.uScroll.value=window.scrollY;});
+  const clock=new THREE.Clock();
+  (function loop(){requestAnimationFrame(loop);uniforms.uTime.value=clock.getElapsedTime();renderer.render(scene,camera);})();
+})();
+
+/* ══════════════════════════════════
+   GSAP
+══════════════════════════════════ */
+gsap.registerPlugin(ScrollTrigger);
+window.addEventListener('load',()=>{
+  const tl=gsap.timeline({defaults:{ease:'power4.out'}});
+  tl.to('#h-badge',{opacity:1,duration:.7,delay:.3})
+    .to('#ln1',{y:'0%',opacity:1,duration:1.0},'-=.3')
+    .to('#ln2',{y:'0%',opacity:1,duration:1.0},'-=.8')
+    .to('#ln3',{y:'0%',opacity:1,duration:1.0},'-=.8')
+    .to('#h-rule',{opacity:1,scaleX:1,duration:.8,transformOrigin:'left'},'-=.5')
+    .to('#h-sub',{opacity:1,y:0,duration:.9},'-=.5')
+    .to('#h-actions',{opacity:1,y:0,duration:.8},'-=.6');
+  [{id:'stat1',end:25,suf:'+'},{id:'stat2',end:5,suf:''}].forEach(({id,end,suf})=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    gsap.to({v:0},{v:end,duration:2.4,delay:1.5,ease:'power2.out',onUpdate(){el.textContent=Math.round(this.targets()[0].v)+suf;}});
+  });
+});
+
+/* Scroll reveals via IntersectionObserver */
+const rvObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');rvObs.unobserve(e.target);}});
+},{threshold:.12});
+function observeRv(){document.querySelectorAll('.rv:not(.vis)').forEach(el=>rvObs.observe(el));}
+observeRv();
+
+/* ══════════════════════════════════
+   CURSOR
+══════════════════════════════════ */
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function moveCursor(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;cur.style.left=mx+'px';cur.style.top=my+'px';ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(moveCursor);})();
+document.addEventListener('mouseover',e=>{if(e.target.matches('a,button,.dev-tab,.faq-q,.t-col,.tier,.ev-card,.event-row,.sched-row,.div-tab'))document.body.classList.add('hov');});
+document.addEventListener('mouseout',e=>{if(e.target.matches('a,button,.dev-tab,.faq-q,.t-col,.tier,.ev-card,.event-row,.sched-row,.div-tab'))document.body.classList.remove('hov');});
+
+/* ══════════════════════════════════
+   NAVIGATION (SPA)
+══════════════════════════════════ */
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+page);
+  if(el){el.classList.add('active');}
+  else{document.getElementById('page-home').classList.add('active');}
+  // update nav active
+  document.querySelectorAll('#nav-links a').forEach(a=>a.classList.remove('active'));
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(observeRv,100);
+}
+function nav(page){toggleMob();navigate(page);}
+function toggleMob(){const m=document.getElementById('mob');m.classList.toggle('open');document.body.style.overflow=m.classList.contains('open')?'hidden':'';}
+
+/* ══════════════════════════════════
+   ANNOUNCEMENT BAR ROTATOR
+══════════════════════════════════ */
+const annMessages=[
+  '<b>NEXT UP:</b> NJSE Mini Camp · Apr 3–5 · New Jersey → <a href="mailto:info@scholarselitegirls.com?subject=Mini Camp Registration" style="color:var(--white);text-decoration:underline;">DM to Register</a>',
+  '<b>OPEN:</b> 2026 Tryouts · March 7 · Bishop Eustace Prep · NJ → <a href="mailto:info@scholarselitegirls.com?subject=Tryout Registration" style="color:var(--white);text-decoration:underline;">Register Now</a>',
+  '<b>SUMMER CAMP:</b> NJSE Shooting Camp · Jun 22–26 · Location TBD → DM to Register',
+  '<b>POSITION CAMP:</b> Jul 6–9 · Location TBD → DM for Details',
+  '<b>TRAVEL EVENT:</b> Run 4 The Roses · Jul 10–13 · Louisville, KY → Team Roster',
+  '<b>COMING SOON:</b> I-95 Classic · Turnpike Challenge · Catholic League Challenge → Dates TBD'
+];
+let annIdx=0;
+function showAnn(idx){
+  annIdx=(idx+annMessages.length)%annMessages.length;
+  document.getElementById('ann-items').innerHTML=`<div class="ann-item">${annMessages[annIdx]}</div>`;
+}
+document.getElementById('ann-prev').onclick=()=>showAnn(annIdx-1);
+document.getElementById('ann-next').onclick=()=>showAnn(annIdx+1);
+setInterval(()=>showAnn(annIdx+1),5000);
+
+/* ══════════════════════════════════
+   DIVISION TABS
+══════════════════════════════════ */
+function setDiv(idx){
+  document.querySelectorAll('#divTabs .div-tab').forEach((t,i)=>t.classList.toggle('on',i===idx));
+  document.querySelectorAll('.div-panel').forEach((p,i)=>p.classList.toggle('on',i===idx));
+  setTimeout(observeRv,50);
+}
+
+/* ══════════════════════════════════
+   DEV PHASE TABS
+══════════════════════════════════ */
+const phases=[
+  {h:'Skill Development',b:'Position-specific fundamentals with emphasis on translatable, game-speed execution. Every session is filmed. Every player gets individual feedback. Individual development plans crafted at the start of each season, updated monthly.',tags:['Ball Control','Shot Mechanics','Decision Shooting','Footwork Series','Finishing Packages','Positional Reads']},
+  {h:'Basketball Intelligence',b:'Basketball IQ separates good from great. Weekly film sessions — teaching players to read the game before it unfolds. Rotations, spacing, help concepts, situational awareness. College-level preparation starts here.',tags:['Film Study','Defensive Rotations','Spacing Concepts','Late-Game Situations','Scouting Reports','Decision Trees']},
+  {h:'Physical Preparation',b:'Sport-specific athletic development designed for the female athlete. Functional strength, explosion, injury resilience — programming tailored to each age group and physical maturity level.',tags:['Functional Strength','Lateral Agility','Vertical Development','Injury Prevention','Conditioning Standards','Recovery Habits']},
+  {h:'Mental Performance',b:'We attack the mental game deliberately. Competition mindset, resilience under pressure, failure response, and confidence-building are embedded into every practice week — not a secondary add-on.',tags:['Competition Mindset','Pressure Reps','Resilience Training','Visualization','Confidence Systems','Pre-Game Prep']},
+  {h:'Recruiting Strategy',b:'Personalized recruiting roadmaps for every athlete with college aspirations — profile creation, tournament selection, coach relationship management, visit strategy, and offer evaluation.',tags:['Athlete Profile','Film Packages','Coach Communication','Visit Strategy','Offer Analysis','Commitment Timeline']},
+  {h:'NIL Education',b:'Every Scholar receives foundational NIL education — deal structures, brand agreements, disclosure requirements, and NCAA compliance. We build business-minded athletes. The NIL landscape rewards the prepared.',tags:['Deal Structures','Brand Agreements','Disclosure Rules','NCAA Compliance','Personal Brand','Social Strategy']}
+];
+function setPhase(idx){
+  document.querySelectorAll('#devTabs .dev-tab').forEach((el,i)=>el.classList.toggle('on',i===idx));
+  const p=phases[idx],panel=document.getElementById('devPanel');
+  panel.style.opacity='0';
+  setTimeout(()=>{
+    panel.innerHTML=`<div class="dp-h">${p.h}</div><div class="dp-b">${p.b}</div><div class="dp-tags">${p.tags.map(t=>`<span class="dp-tag">${t}</span>`).join('')}</div>`;
+    panel.style.opacity='1';panel.style.transition='opacity .3s ease';
+  },120);
+}
+
+/* ══════════════════════════════════
+   FAQ
+══════════════════════════════════ */
+function faqToggle(el){
+  const item=el.parentElement,open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(f=>f.classList.remove('open'));
+  if(!open)item.classList.add('open');
+}
+
+/* ══════════════════════════════════
+   EVENT FILTER
+══════════════════════════════════ */
+function filterEvents(type,btn){
+  document.querySelectorAll('.ef-chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.event-row').forEach(row=>{
+    if(type==='all'){row.removeAttribute('data-hidden');}
+    else{
+      const tags=row.getAttribute('data-tags')||'';
+      row.setAttribute('data-hidden', tags.includes(type)?'false':'true');
+      row.style.display=tags.includes(type)?'':'none';
+    }
+    if(type==='all')row.style.display='';
+  });
+}
+</script>
+</body>
+</html>
